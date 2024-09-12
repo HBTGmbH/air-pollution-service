@@ -43,7 +43,7 @@ func toCountryEmissions(rowsFromFile []*csv.Row) (map[string]map[int]model.Emiss
 
 		_, exists = emissions[row.Entity][row.Year]
 		if exists {
-			return nil, fmt.Errorf("duplicate emissions for year %g and country %s", row.Year, row.Entity)
+			return nil, fmt.Errorf("duplicate emissions for year %d and country %s", row.Year, row.Entity)
 		}
 
 		emissions[row.Entity][row.Year] = model.Emissions{
