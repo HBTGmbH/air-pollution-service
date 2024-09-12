@@ -14,7 +14,7 @@ import (
 
 func main() {
 
-	repository, err := repository.New(csv.New("air-pollution.csv")) // TODO name from config
+	repo, err := repository.New(csv.New("air-pollution.csv")) // TODO name from config
 	if err != nil {
 		log.Panic(err)
 	}
@@ -29,8 +29,8 @@ func main() {
 	r.Use(middleware.URLFormat)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
-	r.Mount("/countries", resource.CountryResource{Repository: repository}.Routes())
-	r.Mount("/emissions", resource.EmissionResource{Repository: repository}.Routes())
+	r.Mount("/countries", resource.CountryResource{Repository: repo}.Routes())
+	r.Mount("/emissions", resource.EmissionResource{Repository: repo}.Routes())
 
 	err = http.ListenAndServe(":3333", r) // TODO port from config
 	if err != nil {
