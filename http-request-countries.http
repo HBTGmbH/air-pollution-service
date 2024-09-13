@@ -1,0 +1,35 @@
+### GET list of all countries
+# expected response:
+# {
+#     {
+#         "name": "Barbados",
+#         "code": "BRB"
+#     },
+#     ...
+# }
+GET {{url}}:{{port}}/countries/
+
+
+### GET a single country
+# expected response:
+# {
+#     "name": "Germany",
+#     "code": "DEU"
+# }
+GET {{url}}:{{port}}/countries/Germany
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function() {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("Country is valid", function() {
+        client.assert(response.body.hasOwnProperty("code"), "Cannot find 'name' in response");
+        client.assert(response.body.hasOwnProperty("code"), "Cannot find 'code' in response");
+    });
+%}

@@ -1,0 +1,31 @@
+### GET list of all emissions by year
+# expected response:
+# {
+#     ...
+#     "2022": {
+#         "nox_emissions": {
+#             "average": 1597043.105081651,
+#             "median": 71152.08,
+#             "standard_deviation": 8007847.335584437
+#         },
+#         ...
+#     }
+#     ...
+# }
+GET {{url}}:{{port}}/emissions/year/
+
+### GET list of all emissions by year
+# expected response:
+# {
+#     ...
+#     "Yemen": {
+#         "nox_emissions": {
+#             "average": 1597043.105081651,
+#             "median": 71152.08,
+#             "standard_deviation": 8007847.335584437
+#         },
+#         ...
+#     }
+#     ...
+# }
+GET {{url}}:{{port}}/emissions/country/

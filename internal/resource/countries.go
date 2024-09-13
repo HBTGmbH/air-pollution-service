@@ -15,7 +15,7 @@ type CountryResource struct {
 
 type countryResponse struct {
 	Name string `json:"name"`
-	Code string `csv:"code"`
+	Code string `json:"code"`
 }
 
 func newCountryResponse(country *model.Country) countryResponse {
