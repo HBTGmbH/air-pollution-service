@@ -26,3 +26,6 @@ The required raw data can be downloaded here https://www.kaggle.com/datasets/rej
 go build cmd/server/main.go
 go go run cmd/server/main.go
 ```
+
+## 📝 TODO
+Authentication: https://github.com/HBTGmbH/air-pollution-service/issues/3
