@@ -16,9 +16,9 @@ The required raw data can be downloaded here https://www.kaggle.com/datasets/rej
 |---------------------------------------------------|-------------|---------------------------|
 | List all countries                                | GET         | /countries                |
 | Returns a single country                          | GET         | /countries/{name}         |
-| List all emissions of all countries for each year | GET         | /emissions/year           |
+| List all emissions of all countries for each year | GET         | /emissions/year/          |
 | Get all emissions of a specific year              | GET         | /emissions/year/{year}    |
-| List all emissions of all years for each country  | GET         | /emissions/country        |
+| List all emissions of all years for each country  | GET         | /emissions/country/       |
 | Get all emissions of a specific country           | GET         | /emissions/country/{name} |
 
 ## 🚀 How to run
@@ -27,16 +27,23 @@ The required raw data can be downloaded here https://www.kaggle.com/datasets/rej
 
 | Name               | Default           | Route                                                                                  |
 |--------------------|-------------------|----------------------------------------------------------------------------------------|
-| SERVER_PORT        | 8080              | Port used by the service                                                               |
+| SERVER_PORT        | 8080              | Port used by the service.                                                              |
 | AIR_POLLUTION_FILE | air-pollution.csv | Path to CSV file with [raw data](ttps://www.kaggle.com/datasets/rejeph/air-pollution). |
 
 ### Locally
- * Copy the raw data to a file, e.g. `/data/air-pollution.csv`.
+ * Download the raw data to a file, e.g. `/data/air-pollution.csv`.
  * Point env variable `AIR_POLLUTION_FILE` to the file path. 
  * Run the service:
 ```bash
 go build cmd/server/main.go
 go go run cmd/server/main.go
+```
+
+### Docker
+* Download the raw data to a file, e.g. `/data/air-pollution.csv`.
+```bash
+docker pull ghcr.io/hbtgmbh/air-pollution-service:20
+docker run --mount type=bind,src=/dat,dst=/data --publish 8080:8080 --env AIR_POLLUTION_FILE=/data/air-pollution.csv ghcr.io/hbtgmbh/air-pollution-service:20
 ```
 
 ## 📝 TODO
