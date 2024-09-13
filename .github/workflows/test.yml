@@ -1,7 +1,9 @@
 name: Test
 
 on:
-  push:
+  pull-request:
+    branches-ignore:
+      main
   workflow_call:
 
 jobs:
