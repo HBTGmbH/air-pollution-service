@@ -19,6 +19,13 @@ The required raw data can be downloaded here https://www.kaggle.com/datasets/rej
 
 ## 🚀 How to run
 
+### Environment
+
+| Name               | Default           | Route                                                                                  |
+|--------------------|-------------------|----------------------------------------------------------------------------------------|
+| SERVER_PORT        | 8080              | Port used by the service                                                               |
+| AIR_POLLUTION_FILE | air-pollution.csv | Path to CSV file with [raw data](ttps://www.kaggle.com/datasets/rejeph/air-pollution). |
+
 ### Locally
  * Copy the raw data to a file, e.g. `/data/air-pollution.csv`.
  * Point env variable `AIR_POLLUTION_FILE` to the file path. 
