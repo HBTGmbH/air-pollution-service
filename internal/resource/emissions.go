@@ -101,6 +101,13 @@ func (rs EmissionResource) ListByYear(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rs EmissionResource) ListByCountry(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("todos list of stuff.."))
-	// TODO
+	response := make(map[string]airPollutionEmissionsResponse)
+	for country, emissions := range rs.FindAllByCountries() {
+		response[country] = newAirPollutionEmissionsResponse(emissions)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		render.Status(r, 500)
+	}
 }

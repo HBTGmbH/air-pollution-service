@@ -89,6 +89,17 @@ func (r *Repository) FindAllByYears() map[int][]*model.Emissions {
 	return emissions
 }
 
+func (r *Repository) FindAllByCountries() map[string][]*model.Emissions {
+	emissions := make(map[string][]*model.Emissions)
+	for name, countryEmissions := range r.emissions {
+		emissions[name] = []*model.Emissions{}
+		for _, countryEmissionsOfYear := range countryEmissions {
+			emissions[name] = append(emissions[name], &countryEmissionsOfYear)
+		}
+	}
+	return emissions
+}
+
 func (r *Repository) FindAllByCountry(name string) map[int]*model.Emissions {
 	emissions := make(map[int]*model.Emissions)
 	for year, countryEmissionsOfYear := range r.emissions[name] {
