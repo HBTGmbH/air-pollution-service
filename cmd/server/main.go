@@ -1,10 +1,12 @@
 package main
 
 import (
+	"air-pollution-service/config"
 	"air-pollution-service/internal/csv"
 	"air-pollution-service/internal/repository"
 	"air-pollution-service/internal/resource"
 	"flag"
+	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
@@ -13,8 +15,9 @@ import (
 )
 
 func main() {
+	c := config.New()
 
-	repo, err := repository.New(csv.New("air-pollution.csv")) // TODO name from config
+	repo, err := repository.New(csv.New(c.AirPollutionFile))
 	if err != nil {
 		log.Panic(err)
 	}
@@ -32,8 +35,8 @@ func main() {
 	r.Mount("/countries", resource.CountryResource{Repository: repo}.Routes())
 	r.Mount("/emissions", resource.EmissionResource{Repository: repo}.Routes())
 
-	err = http.ListenAndServe(":3333", r) // TODO port from config
+	err = http.ListenAndServe(fmt.Sprintf(":%d", c.Server.Port), r)
 	if err != nil {
-		log.Panic(err)
+		log.Panicf("Failed to start server %s", err)
 	}
 }

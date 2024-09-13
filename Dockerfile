@@ -10,4 +10,4 @@ RUN go get ./...
 RUN go build -ldflags '-w -s' -a -o ./bin/server ./cmd/server
 
 CMD ["/air-pollution-service/bin/server"]
-EXPOSE 3333
+EXPOSE 8080

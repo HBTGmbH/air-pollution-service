@@ -2,6 +2,7 @@ package csv
 
 import (
 	"github.com/gocarina/gocsv"
+	"log"
 	"os"
 )
 
@@ -37,7 +38,7 @@ func (f *File) ReadRows() ([]*Row, error) {
 	defer func(csvFile *os.File) {
 		err := csvFile.Close()
 		if err != nil {
-			panic(err)
+			log.Fatalf("Failed to close file %s", f.fileName)
 		}
 	}(csvFile)
 
