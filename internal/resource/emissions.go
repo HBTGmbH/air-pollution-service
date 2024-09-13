@@ -4,7 +4,7 @@ import (
 	"air-pollution-service/internal/model"
 	"air-pollution-service/internal/repository"
 	"encoding/json"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"net/http"
 )
