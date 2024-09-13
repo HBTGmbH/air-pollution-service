@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/render"
 	"github.com/montanaflynn/stats"
 	"net/http"
+	"strconv"
 )
 
 type EmissionResource struct {
@@ -86,6 +87,7 @@ func (rs EmissionResource) Routes() chi.Router {
 
 	r.Route("/year/", func(r chi.Router) {
 		r.Get("/", rs.ListByYear)
+		r.Get("/{year}", rs.GetByYear)
 	})
 
 	r.Route("/country/", func(r chi.Router) {
@@ -104,6 +106,26 @@ func (rs EmissionResource) ListByYear(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
+		render.Status(r, 500)
+	}
+}
+
+func (rs EmissionResource) GetByYear(w http.ResponseWriter, r *http.Request) {
+	year, err := strconv.Atoi(chi.URLParam(r, "year"))
+	if err != nil {
+		if err := render.Render(w, r, ErrRender(fmt.Sprintf("Invalid year"), 400)); err != nil {
+			render.Status(r, 500)
+		}
+		return
+	}
+
+	var yearEmissions []*model.Emissions
+	for _, emissions := range rs.Storage.FindAllByYear(year) {
+		yearEmissions = append(yearEmissions, emissions)
+	}
+
+	response := newAirPollutionEmissionsResponse(yearEmissions)
+	if err := render.Render(w, r, response); err != nil {
 		render.Status(r, 500)
 	}
 }

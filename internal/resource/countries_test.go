@@ -17,15 +17,19 @@ type fakeCountryStorage struct {
 }
 
 func (s fakeCountryStorage) FindAllByYears() map[int][]*model.Emissions {
-	return nil
+	panic("not implemented")
+}
+
+func (s fakeCountryStorage) FindAllByYear(year int) map[string]*model.Emissions {
+	panic("not implemented")
 }
 
 func (s fakeCountryStorage) FindAllByCountries() map[string][]*model.Emissions {
-	return nil
+	panic("not implemented")
 }
 
 func (s fakeCountryStorage) FindAllByCountry(name string) map[int]*model.Emissions {
-	return nil
+	panic("not implemented")
 }
 
 func (s fakeCountryStorage) GetCountry(name string) *model.Country {

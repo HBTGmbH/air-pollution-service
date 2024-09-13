@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 )
 
@@ -19,6 +20,14 @@ type fakeEmissionsStorage struct {
 func (s fakeEmissionsStorage) FindAllByYears() map[int][]*model.Emissions {
 	result := make(map[int][]*model.Emissions)
 	result[1234] = s.emissions
+	return result
+}
+
+func (s fakeEmissionsStorage) FindAllByYear(year int) map[string]*model.Emissions {
+	result := make(map[string]*model.Emissions)
+	for i, e := range s.emissions {
+		result[strconv.Itoa(i)] = e
+	}
 	return result
 }
 
@@ -37,11 +46,11 @@ func (s fakeEmissionsStorage) FindAllByCountry(name string) map[int]*model.Emiss
 }
 
 func (s fakeEmissionsStorage) GetCountry(name string) *model.Country {
-	return nil
+	panic("not implemented")
 }
 
 func (s fakeEmissionsStorage) GetCountries() []*model.Country {
-	return nil
+	panic("not implemented")
 }
 
 func TestEmissionsListByYear(t *testing.T) {
@@ -105,6 +114,35 @@ func TestEmissionsGetByCountry(t *testing.T) {
 	}}}}
 
 	emissionsHandler.GetByCountry(w, req)
+	res := w.Result()
+	defer res.Body.Close()
+	data, err := ioutil.ReadAll(res.Body)
+	assert.Nil(t, err)
+	assert.Equal(t, 200, res.StatusCode)
+
+	airPollutionEmissions := airPollutionEmissionsResponse{}
+	err = json.Unmarshal(data, &airPollutionEmissions)
+	assert.Nil(t, err)
+	assert.Equal(t, 5.0, airPollutionEmissions.NOxEmissions.Average)
+	assert.Equal(t, 3.0, airPollutionEmissions.NOxEmissions.Median)
+	assert.Equal(t, 3.559026084010437, airPollutionEmissions.NOxEmissions.StandardDeviation)
+}
+
+func TestEmissionsGetByYear(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	ctx := chi.NewRouteContext()
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
+	ctx.URLParams.Add("year", "666")
+	emissionsHandler := EmissionResource{Storage: fakeEmissionsStorage{[]*model.Emissions{{
+		NOxEmissions: 10,
+	}, {
+		NOxEmissions: 2,
+	}, {
+		NOxEmissions: 3,
+	}}}}
+
+	emissionsHandler.GetByYear(w, req)
 	res := w.Result()
 	defer res.Body.Close()
 	data, err := ioutil.ReadAll(res.Body)

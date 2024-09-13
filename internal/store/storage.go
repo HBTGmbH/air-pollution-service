@@ -13,6 +13,7 @@ type Store struct {
 
 type Storage interface {
 	FindAllByYears() map[int][]*model.Emissions
+	FindAllByYear(year int) map[string]*model.Emissions
 	FindAllByCountries() map[string][]*model.Emissions
 	FindAllByCountry(name string) map[int]*model.Emissions
 	GetCountry(name string) *model.Country
@@ -92,6 +93,17 @@ func (s *Store) FindAllByYears() map[int][]*model.Emissions {
 			} else {
 				emissions[year] = append(emissions[year], &countryEmissionsOfYear)
 			}
+		}
+	}
+	return emissions
+}
+
+func (s *Store) FindAllByYear(year int) map[string]*model.Emissions {
+	emissions := make(map[string]*model.Emissions)
+	for name, countryEmissions := range s.emissions {
+		countryEmissionsOfYear, found := countryEmissions[year]
+		if found {
+			emissions[name] = &countryEmissionsOfYear
 		}
 	}
 	return emissions
