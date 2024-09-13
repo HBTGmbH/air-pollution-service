@@ -2,7 +2,7 @@ package resource
 
 import (
 	"air-pollution-service/internal/model"
-	"air-pollution-service/internal/repository"
+	"air-pollution-service/internal/store"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
@@ -10,7 +10,7 @@ import (
 )
 
 type CountryResource struct {
-	*repository.Repository
+	Storage store.Storage
 }
 
 type countryResponse struct {
@@ -42,7 +42,7 @@ func (rs CountryResource) Routes() chi.Router {
 }
 
 func (rs CountryResource) List(w http.ResponseWriter, r *http.Request) {
-	countries := rs.Repository.GetCountries()
+	countries := rs.Storage.GetCountries()
 	if countries == nil {
 		if err := render.Render(w, r, ErrRender(fmt.Sprintf("No country found"), 404)); err != nil {
 			render.Status(r, 500)
@@ -71,7 +71,7 @@ func (rs CountryResource) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	country := rs.Repository.GetCountry(name)
+	country := rs.Storage.GetCountry(name)
 	if country == nil {
 		if err := render.Render(w, r, ErrRender(fmt.Sprintf("No country with name %s found", name), 404)); err != nil {
 			render.Status(r, 500)

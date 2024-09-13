@@ -1,4 +1,4 @@
-package repository
+package store
 
 import (
 	"air-pollution-service/internal/csv"
@@ -6,12 +6,20 @@ import (
 	"fmt"
 )
 
-type Repository struct {
+type Store struct {
 	emissions map[string]map[int]model.Emissions
 	countries map[string]model.Country
 }
 
-func New(file *csv.File) (*Repository, error) {
+type Storage interface {
+	FindAllByYears() map[int][]*model.Emissions
+	FindAllByCountries() map[string][]*model.Emissions
+	FindAllByCountry(name string) map[int]*model.Emissions
+	GetCountry(name string) *model.Country
+	GetCountries() []*model.Country
+}
+
+func New(file *csv.File) (*Store, error) {
 	rows, err := file.ReadRows()
 	if err != nil {
 		return nil, err
@@ -27,7 +35,7 @@ func New(file *csv.File) (*Repository, error) {
 		return nil, err
 	}
 
-	return &Repository{
+	return &Store{
 		emissions: emissions,
 		countries: countries,
 	}, nil
@@ -74,9 +82,9 @@ func toCountries(rowsFromFile []*csv.Row) (map[string]model.Country, error) {
 	return countries, nil
 }
 
-func (r *Repository) FindAllByYears() map[int][]*model.Emissions {
+func (s *Store) FindAllByYears() map[int][]*model.Emissions {
 	emissions := make(map[int][]*model.Emissions)
-	for _, countryEmissions := range r.emissions {
+	for _, countryEmissions := range s.emissions {
 		for year, countryEmissionsOfYear := range countryEmissions {
 			_, found := emissions[year]
 			if !found {
@@ -89,9 +97,9 @@ func (r *Repository) FindAllByYears() map[int][]*model.Emissions {
 	return emissions
 }
 
-func (r *Repository) FindAllByCountries() map[string][]*model.Emissions {
+func (s *Store) FindAllByCountries() map[string][]*model.Emissions {
 	emissions := make(map[string][]*model.Emissions)
-	for name, countryEmissions := range r.emissions {
+	for name, countryEmissions := range s.emissions {
 		emissions[name] = []*model.Emissions{}
 		for _, countryEmissionsOfYear := range countryEmissions {
 			emissions[name] = append(emissions[name], &countryEmissionsOfYear)
@@ -100,25 +108,25 @@ func (r *Repository) FindAllByCountries() map[string][]*model.Emissions {
 	return emissions
 }
 
-func (r *Repository) FindAllByCountry(name string) map[int]*model.Emissions {
+func (s *Store) FindAllByCountry(name string) map[int]*model.Emissions {
 	emissions := make(map[int]*model.Emissions)
-	for year, countryEmissionsOfYear := range r.emissions[name] {
+	for year, countryEmissionsOfYear := range s.emissions[name] {
 		emissions[year] = &countryEmissionsOfYear
 	}
 	return emissions
 }
 
-func (r *Repository) GetCountry(name string) *model.Country {
-	country, exists := r.countries[name]
+func (s *Store) GetCountry(name string) *model.Country {
+	country, exists := s.countries[name]
 	if exists {
 		return &country
 	}
 	return nil
 }
 
-func (r *Repository) GetCountries() []*model.Country {
+func (s *Store) GetCountries() []*model.Country {
 	var countries []*model.Country
-	for _, country := range r.countries {
+	for _, country := range s.countries {
 		countries = append(countries, &country)
 	}
 	return countries

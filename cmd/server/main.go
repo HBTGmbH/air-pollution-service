@@ -3,8 +3,8 @@ package main
 import (
 	"air-pollution-service/config"
 	"air-pollution-service/internal/csv"
-	"air-pollution-service/internal/repository"
 	"air-pollution-service/internal/resource"
+	"air-pollution-service/internal/store"
 	"flag"
 	"fmt"
 	"github.com/go-chi/chi/v5"
@@ -17,7 +17,7 @@ import (
 func main() {
 	c := config.New()
 
-	repo, err := repository.New(csv.New(c.AirPollutionFile))
+	repo, err := store.New(csv.New(c.AirPollutionFile))
 	if err != nil {
 		log.Panic(err)
 	}
@@ -32,8 +32,8 @@ func main() {
 	r.Use(middleware.URLFormat)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
-	r.Mount("/countries", resource.CountryResource{Repository: repo}.Routes())
-	r.Mount("/emissions", resource.EmissionResource{Repository: repo}.Routes())
+	r.Mount("/countries", resource.CountryResource{Storage: repo}.Routes())
+	r.Mount("/emissions", resource.EmissionResource{Storage: repo}.Routes())
 
 	err = http.ListenAndServe(fmt.Sprintf(":%d", c.Server.Port), r)
 	if err != nil {

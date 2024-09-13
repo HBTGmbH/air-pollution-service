@@ -29,3 +29,15 @@ GET {{url}}:{{port}}/emissions/year/
 #     ...
 # }
 GET {{url}}:{{port}}/emissions/country/
+
+### GET all emissions of a single country
+# expected response:
+# {
+#     "nox_emissions": {
+#         "average": 1597043.105081651,
+#         "median": 71152.08,
+#         "standard_deviation": 8007847.335584437
+#     },
+#     ...
+# }
+GET {{url}}:{{port}}/emissions/country/Germany

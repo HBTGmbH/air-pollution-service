@@ -2,8 +2,9 @@ package resource
 
 import (
 	"air-pollution-service/internal/model"
-	"air-pollution-service/internal/repository"
+	"air-pollution-service/internal/store"
 	"encoding/json"
+	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"github.com/montanaflynn/stats"
@@ -11,7 +12,7 @@ import (
 )
 
 type EmissionResource struct {
-	*repository.Repository
+	Storage store.Storage
 }
 
 type airPollutionResponse struct {
@@ -89,6 +90,7 @@ func (rs EmissionResource) Routes() chi.Router {
 
 	r.Route("/country/", func(r chi.Router) {
 		r.Get("/", rs.ListByCountry)
+		r.Get("/{name}", rs.GetByCountry)
 	})
 
 	return r
@@ -96,7 +98,7 @@ func (rs EmissionResource) Routes() chi.Router {
 
 func (rs EmissionResource) ListByYear(w http.ResponseWriter, r *http.Request) {
 	response := make(map[int]airPollutionEmissionsResponse)
-	for year, emissions := range rs.FindAllByYears() {
+	for year, emissions := range rs.Storage.FindAllByYears() {
 		response[year] = newAirPollutionEmissionsResponse(emissions)
 	}
 
@@ -108,12 +110,32 @@ func (rs EmissionResource) ListByYear(w http.ResponseWriter, r *http.Request) {
 
 func (rs EmissionResource) ListByCountry(w http.ResponseWriter, r *http.Request) {
 	response := make(map[string]airPollutionEmissionsResponse)
-	for country, emissions := range rs.FindAllByCountries() {
+	for country, emissions := range rs.Storage.FindAllByCountries() {
 		response[country] = newAirPollutionEmissionsResponse(emissions)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
+		render.Status(r, 500)
+	}
+}
+
+func (rs EmissionResource) GetByCountry(w http.ResponseWriter, r *http.Request) {
+	name := chi.URLParam(r, "name")
+	if name == "" {
+		if err := render.Render(w, r, ErrRender(fmt.Sprintf("Country name missing"), 400)); err != nil {
+			render.Status(r, 500)
+		}
+		return
+	}
+
+	var countryEmissions []*model.Emissions
+	for _, emissions := range rs.Storage.FindAllByCountry(name) {
+		countryEmissions = append(countryEmissions, emissions)
+	}
+
+	response := newAirPollutionEmissionsResponse(countryEmissions)
+	if err := render.Render(w, r, response); err != nil {
 		render.Status(r, 500)
 	}
 }

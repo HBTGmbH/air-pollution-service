@@ -1,7 +1,7 @@
-package repository
+package store
 
 import "testing"
 
 func TestRepository(t *testing.T) {
-	// TODO
+	// TODO add tests
 }
