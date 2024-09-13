@@ -40,4 +40,4 @@ GET {{url}}:{{port}}/emissions/country/
 #     },
 #     ...
 # }
-GET {{url}}:{{port}}/emissions/country/Germany
+GET {{url}}:{{port}}/emissions/country/Zimbabwe
