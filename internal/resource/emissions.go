@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
+	"github.com/montanaflynn/stats"
 	"net/http"
 )
 
@@ -14,23 +15,28 @@ type EmissionResource struct {
 }
 
 type airPollutionResponse struct {
-	Average  float64 `json:"average"`
-	Median   float64 `json:"median"`
-	Variance float64 `json:"variance"`
+	Average           float64 `json:"average"`
+	Median            float64 `json:"median"`
+	StandardDeviation float64 `json:"standard_deviation"`
 }
 
 func newAirPollutionResponse(emissions []*model.Emissions, f func(emission *model.Emissions) float64) airPollutionResponse {
 	total := 0.0
+	values := make([]float64, len(emissions))
 
-	for _, emission := range emissions {
+	for i, emission := range emissions {
 		current := f(emission)
+		values[i] = current
 		total = total + current
 	}
 
+	median, _ := stats.Median(values)
+	standardDeviation, _ := stats.StandardDeviation(values)
+
 	return airPollutionResponse{
-		Average:  total / float64(len(emissions)),
-		Median:   0.0, // TODO
-		Variance: 0.0, // TODO
+		Average:           total / float64(len(emissions)),
+		Median:            median,
+		StandardDeviation: standardDeviation,
 	}
 }
 
