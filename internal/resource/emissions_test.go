@@ -120,7 +120,7 @@ func TestEmissionsGetByCountry(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 200, res.StatusCode)
 
-	airPollutionEmissions := airPollutionEmissionsResponse{}
+	airPollutionEmissions := AirPollutionResponse{}
 	err = json.Unmarshal(data, &airPollutionEmissions)
 	assert.Nil(t, err)
 	assert.Equal(t, 5.0, airPollutionEmissions.NOxEmissions.Average)
@@ -149,7 +149,7 @@ func TestEmissionsGetByYear(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 200, res.StatusCode)
 
-	airPollutionEmissions := airPollutionEmissionsResponse{}
+	airPollutionEmissions := AirPollutionResponse{}
 	err = json.Unmarshal(data, &airPollutionEmissions)
 	assert.Nil(t, err)
 	assert.Equal(t, 5.0, airPollutionEmissions.NOxEmissions.Average)

@@ -1,29 +1,34 @@
 definitions:
-  AirPollutionEmissionsResponse:
+  AirPollutionCountries:
     properties:
-      ammonia_emissions:
-        $ref: '#/definitions/AirPollutionResponse'
-      black_carbon_emissions:
-        $ref: '#/definitions/AirPollutionResponse'
-      carbon_monoxide_emissions:
-        $ref: '#/definitions/AirPollutionResponse'
-      nmvoc_emissions:
-        $ref: '#/definitions/AirPollutionResponse'
-      nox_emissions:
-        $ref: '#/definitions/AirPollutionResponse'
-      organic_carbon_emissions:
-        $ref: '#/definitions/AirPollutionResponse'
-      sulphur_dioxide_emissions:
-        $ref: '#/definitions/AirPollutionResponse'
+      countries:
+        additionalProperties:
+          $ref: '#/definitions/AirPollutionResponse'
+        type: object
     type: object
   AirPollutionResponse:
     properties:
-      average:
-        type: number
-      median:
-        type: number
-      standard_deviation:
-        type: number
+      ammonia_emissions:
+        $ref: '#/definitions/EmissionsResponse'
+      black_carbon_emissions:
+        $ref: '#/definitions/EmissionsResponse'
+      carbon_monoxide_emissions:
+        $ref: '#/definitions/EmissionsResponse'
+      nmvoc_emissions:
+        $ref: '#/definitions/EmissionsResponse'
+      nox_emissions:
+        $ref: '#/definitions/EmissionsResponse'
+      organic_carbon_emissions:
+        $ref: '#/definitions/EmissionsResponse'
+      sulphur_dioxide_emissions:
+        $ref: '#/definitions/EmissionsResponse'
+    type: object
+  AirPollutionYears:
+    properties:
+      years:
+        additionalProperties:
+          $ref: '#/definitions/AirPollutionResponse'
+        type: object
     type: object
   CountryResponse:
     properties:
@@ -32,10 +37,23 @@ definitions:
       name:
         type: string
     type: object
+  EmissionsResponse:
+    properties:
+      average:
+        type: number
+      median:
+        type: number
+      standard_deviation:
+        type: number
+    type: object
   ErrResponse:
     properties:
-      status:
+      code:
+        example: 404
         type: integer
+      error:
+        example: The requested resource was not found on the server.
+        type: string
       text:
         type: string
     type: object
@@ -44,7 +62,7 @@ info:
 paths:
   /countries/:
     get:
-      description: TODO
+      description: Returns all countries available in the database
       produces:
       - application/json
       responses:
@@ -58,20 +76,16 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrResponse'
-        "405":
-          description: Method Not Allowed
+        "404":
+          description: Not Found
           schema:
             $ref: '#/definitions/ErrResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrResponse'
-      summary: TODO
+      summary: List all available countries
       tags:
       - country
   /countries/{name}:
     get:
-      description: TODO
+      description: Returns a single country by name
       parameters:
       - description: name of the country
         in: path
@@ -89,47 +103,31 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrResponse'
-        "405":
-          description: Method Not Allowed
+        "404":
+          description: Not Found
           schema:
             $ref: '#/definitions/ErrResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrResponse'
-      summary: TODO
+      summary: Get country by its name
       tags:
       - country
   /emissions/country/:
     get:
-      description: TODO
+      description: All historical emissions data of each country accumulated over
+        all years
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              $ref: '#/definitions/AirPollutionEmissionsResponse'
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrResponse'
-        "405":
-          description: Method Not Allowed
-          schema:
-            $ref: '#/definitions/ErrResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrResponse'
-      summary: TODO
+            $ref: '#/definitions/AirPollutionCountries'
+      summary: List emissions of each country accumulated over all years
       tags:
       - emission country
   /emissions/country/{name}:
     get:
-      description: TODO
+      description: All historical emissions data of a country accumulated over all
+        years, available in the database
       parameters:
       - description: name of the country
         in: path
@@ -142,52 +140,36 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/AirPollutionEmissionsResponse'
+            $ref: '#/definitions/AirPollutionResponse'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrResponse'
-        "405":
-          description: Method Not Allowed
+        "404":
+          description: Not Found
           schema:
             $ref: '#/definitions/ErrResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrResponse'
-      summary: TODO
+      summary: Get emissions of all years accumulated for a single country
       tags:
       - emission country
   /emissions/year/:
     get:
-      description: TODO
+      description: All historical emissions data of each year accumulated over all
+        countries
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              $ref: '#/definitions/AirPollutionEmissionsResponse'
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrResponse'
-        "405":
-          description: Method Not Allowed
-          schema:
-            $ref: '#/definitions/ErrResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrResponse'
-      summary: TODO
+            $ref: '#/definitions/AirPollutionYears'
+      summary: List emissions of each year accumulated over all countries
       tags:
       - emission year
   /emissions/year/{year}:
     get:
-      description: TODO
+      description: All historical emissions data of a year accumulated over all countries,
+        available in the database
       parameters:
       - description: year
         in: path
@@ -200,20 +182,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/AirPollutionEmissionsResponse'
+            $ref: '#/definitions/AirPollutionResponse'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrResponse'
-        "405":
-          description: Method Not Allowed
-          schema:
-            $ref: '#/definitions/ErrResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrResponse'
-      summary: TODO
+      summary: Get emissions of all countries accumulated for a single year
       tags:
       - emission year
 swagger: "2.0"

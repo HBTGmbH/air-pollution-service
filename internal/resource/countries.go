@@ -1,7 +1,6 @@
 package resource
 
 import (
-	"air-pollution-service/internal/model"
 	"air-pollution-service/internal/store"
 	"errors"
 	"fmt"
@@ -12,23 +11,6 @@ import (
 
 type CountryResource struct {
 	Storage store.Storage
-}
-
-// CountryResponse TODO
-type countryResponse struct {
-	Name string `json:"name"`
-	Code string `json:"code"`
-} // @name CountryResponse
-
-func newCountryResponse(country *model.Country) countryResponse {
-	return countryResponse{
-		Name: country.Name,
-		Code: country.Code,
-	}
-}
-
-func (hr countryResponse) Render(w http.ResponseWriter, r *http.Request) error {
-	return nil
 }
 
 func (rs CountryResource) Routes() chi.Router {
@@ -43,9 +25,9 @@ func (rs CountryResource) Routes() chi.Router {
 	return r
 }
 
-// List TODO
-// @Summary TODO
-// @Description TODO
+// List returns all countries
+// @Summary List all available countries
+// @Description Returns all countries available in the database
 // @Tags country
 // @Produce json
 // @Router /countries/ [get]
@@ -67,9 +49,9 @@ func (rs CountryResource) List(w http.ResponseWriter, r *http.Request) {
 	_ = render.RenderList(w, r, response)
 }
 
-// Get TODO
-// @Summary TODO
-// @Description TODO
+// Get returns a single country
+// @Summary Get country by its name
+// @Description Returns a single country by name
 // @Tags country
 // @Produce json
 // @Router /countries/{name} [get]

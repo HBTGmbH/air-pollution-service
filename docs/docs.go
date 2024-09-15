@@ -17,14 +17,14 @@ const docTemplate = `{
     "paths": {
         "/countries/": {
             "get": {
-                "description": "TODO",
+                "description": "Returns all countries available in the database",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "country"
                 ],
-                "summary": "TODO",
+                "summary": "List all available countries",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -41,14 +41,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/ErrResponse"
                         }
                     },
-                    "405": {
-                        "description": "Method Not Allowed",
-                        "schema": {
-                            "$ref": "#/definitions/ErrResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/ErrResponse"
                         }
@@ -58,14 +52,14 @@ const docTemplate = `{
         },
         "/countries/{name}": {
             "get": {
-                "description": "TODO",
+                "description": "Returns a single country by name",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "country"
                 ],
-                "summary": "TODO",
+                "summary": "Get country by its name",
                 "parameters": [
                     {
                         "type": "string",
@@ -88,14 +82,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/ErrResponse"
                         }
                     },
-                    "405": {
-                        "description": "Method Not Allowed",
-                        "schema": {
-                            "$ref": "#/definitions/ErrResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/ErrResponse"
                         }
@@ -105,40 +93,19 @@ const docTemplate = `{
         },
         "/emissions/country/": {
             "get": {
-                "description": "TODO",
+                "description": "All historical emissions data of each country accumulated over all years",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "emission country"
                 ],
-                "summary": "TODO",
+                "summary": "List emissions of each country accumulated over all years",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "$ref": "#/definitions/AirPollutionEmissionsResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/ErrResponse"
-                        }
-                    },
-                    "405": {
-                        "description": "Method Not Allowed",
-                        "schema": {
-                            "$ref": "#/definitions/ErrResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/ErrResponse"
+                            "$ref": "#/definitions/AirPollutionCountries"
                         }
                     }
                 }
@@ -146,14 +113,14 @@ const docTemplate = `{
         },
         "/emissions/country/{name}": {
             "get": {
-                "description": "TODO",
+                "description": "All historical emissions data of a country accumulated over all years, available in the database",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "emission country"
                 ],
-                "summary": "TODO",
+                "summary": "Get emissions of all years accumulated for a single country",
                 "parameters": [
                     {
                         "type": "string",
@@ -167,7 +134,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/AirPollutionEmissionsResponse"
+                            "$ref": "#/definitions/AirPollutionResponse"
                         }
                     },
                     "400": {
@@ -176,14 +143,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/ErrResponse"
                         }
                     },
-                    "405": {
-                        "description": "Method Not Allowed",
-                        "schema": {
-                            "$ref": "#/definitions/ErrResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/ErrResponse"
                         }
@@ -193,40 +154,19 @@ const docTemplate = `{
         },
         "/emissions/year/": {
             "get": {
-                "description": "TODO",
+                "description": "All historical emissions data of each year accumulated over all countries",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "emission year"
                 ],
-                "summary": "TODO",
+                "summary": "List emissions of each year accumulated over all countries",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "$ref": "#/definitions/AirPollutionEmissionsResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/ErrResponse"
-                        }
-                    },
-                    "405": {
-                        "description": "Method Not Allowed",
-                        "schema": {
-                            "$ref": "#/definitions/ErrResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/ErrResponse"
+                            "$ref": "#/definitions/AirPollutionYears"
                         }
                     }
                 }
@@ -234,14 +174,14 @@ const docTemplate = `{
         },
         "/emissions/year/{year}": {
             "get": {
-                "description": "TODO",
+                "description": "All historical emissions data of a year accumulated over all countries, available in the database",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "emission year"
                 ],
-                "summary": "TODO",
+                "summary": "Get emissions of all countries accumulated for a single year",
                 "parameters": [
                     {
                         "type": "string",
@@ -255,23 +195,11 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/AirPollutionEmissionsResponse"
+                            "$ref": "#/definitions/AirPollutionResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/ErrResponse"
-                        }
-                    },
-                    "405": {
-                        "description": "Method Not Allowed",
-                        "schema": {
-                            "$ref": "#/definitions/ErrResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/ErrResponse"
                         }
@@ -281,43 +209,51 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "AirPollutionEmissionsResponse": {
+        "AirPollutionCountries": {
             "type": "object",
             "properties": {
-                "ammonia_emissions": {
-                    "$ref": "#/definitions/AirPollutionResponse"
-                },
-                "black_carbon_emissions": {
-                    "$ref": "#/definitions/AirPollutionResponse"
-                },
-                "carbon_monoxide_emissions": {
-                    "$ref": "#/definitions/AirPollutionResponse"
-                },
-                "nmvoc_emissions": {
-                    "$ref": "#/definitions/AirPollutionResponse"
-                },
-                "nox_emissions": {
-                    "$ref": "#/definitions/AirPollutionResponse"
-                },
-                "organic_carbon_emissions": {
-                    "$ref": "#/definitions/AirPollutionResponse"
-                },
-                "sulphur_dioxide_emissions": {
-                    "$ref": "#/definitions/AirPollutionResponse"
+                "countries": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/AirPollutionResponse"
+                    }
                 }
             }
         },
         "AirPollutionResponse": {
             "type": "object",
             "properties": {
-                "average": {
-                    "type": "number"
+                "ammonia_emissions": {
+                    "$ref": "#/definitions/EmissionsResponse"
                 },
-                "median": {
-                    "type": "number"
+                "black_carbon_emissions": {
+                    "$ref": "#/definitions/EmissionsResponse"
                 },
-                "standard_deviation": {
-                    "type": "number"
+                "carbon_monoxide_emissions": {
+                    "$ref": "#/definitions/EmissionsResponse"
+                },
+                "nmvoc_emissions": {
+                    "$ref": "#/definitions/EmissionsResponse"
+                },
+                "nox_emissions": {
+                    "$ref": "#/definitions/EmissionsResponse"
+                },
+                "organic_carbon_emissions": {
+                    "$ref": "#/definitions/EmissionsResponse"
+                },
+                "sulphur_dioxide_emissions": {
+                    "$ref": "#/definitions/EmissionsResponse"
+                }
+            }
+        },
+        "AirPollutionYears": {
+            "type": "object",
+            "properties": {
+                "years": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/AirPollutionResponse"
+                    }
                 }
             }
         },
@@ -332,11 +268,30 @@ const docTemplate = `{
                 }
             }
         },
+        "EmissionsResponse": {
+            "type": "object",
+            "properties": {
+                "average": {
+                    "type": "number"
+                },
+                "median": {
+                    "type": "number"
+                },
+                "standard_deviation": {
+                    "type": "number"
+                }
+            }
+        },
         "ErrResponse": {
             "type": "object",
             "properties": {
-                "status": {
-                    "type": "integer"
+                "code": {
+                    "type": "integer",
+                    "example": 404
+                },
+                "error": {
+                    "type": "string",
+                    "example": "The requested resource was not found on the server."
                 },
                 "text": {
                     "type": "string"
