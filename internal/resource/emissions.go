@@ -4,6 +4,7 @@ import (
 	"air-pollution-service/internal/model"
 	"air-pollution-service/internal/store"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
@@ -107,19 +108,13 @@ func (rs EmissionResource) Routes() chi.Router {
 // @Produce json
 // @Router /emissions/year/ [get]
 // @Success 200 {object} map[country]AirPollutionEmissionsResponse
-// @Failure 400 {object} ErrResponse
-// @Failure 405 {object} ErrResponse
-// @Failure 500 {object} ErrResponse
 func (rs EmissionResource) ListByYear(w http.ResponseWriter, r *http.Request) {
 	response := make(map[int]airPollutionEmissionsResponse)
 	for year, emissions := range rs.Storage.FindAllByYears() {
 		response[year] = newAirPollutionEmissionsResponse(emissions)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		render.Status(r, 500)
-	}
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 // GetByYear TODO
@@ -131,14 +126,10 @@ func (rs EmissionResource) ListByYear(w http.ResponseWriter, r *http.Request) {
 // @Param year path string true "year"
 // @Success 200 {object} AirPollutionEmissionsResponse
 // @Failure 400 {object} ErrResponse
-// @Failure 405 {object} ErrResponse
-// @Failure 500 {object} ErrResponse
 func (rs EmissionResource) GetByYear(w http.ResponseWriter, r *http.Request) {
 	year, err := strconv.Atoi(chi.URLParam(r, "year"))
 	if err != nil {
-		if err := render.Render(w, r, ErrRender(fmt.Sprintf("Invalid year"), 400)); err != nil {
-			render.Status(r, 500)
-		}
+		_ = render.Render(w, r, ErrInvalidRequest(errors.New(fmt.Sprintf("Year missing"))))
 		return
 	}
 
@@ -147,10 +138,9 @@ func (rs EmissionResource) GetByYear(w http.ResponseWriter, r *http.Request) {
 		yearEmissions = append(yearEmissions, emissions)
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	response := newAirPollutionEmissionsResponse(yearEmissions)
-	if err := render.Render(w, r, response); err != nil {
-		render.Status(r, 500)
-	}
+	_ = render.Render(w, r, response)
 }
 
 // ListByCountry TODO
@@ -160,9 +150,6 @@ func (rs EmissionResource) GetByYear(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Router /emissions/country/ [get]
 // @Success 200 {object} map[year]AirPollutionEmissionsResponse
-// @Failure 400 {object} ErrResponse
-// @Failure 405 {object} ErrResponse
-// @Failure 500 {object} ErrResponse
 func (rs EmissionResource) ListByCountry(w http.ResponseWriter, r *http.Request) {
 	response := make(map[string]airPollutionEmissionsResponse)
 	for country, emissions := range rs.Storage.FindAllByCountries() {
@@ -170,9 +157,7 @@ func (rs EmissionResource) ListByCountry(w http.ResponseWriter, r *http.Request)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		render.Status(r, 500)
-	}
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 // GetByCountry TODO
@@ -184,14 +169,11 @@ func (rs EmissionResource) ListByCountry(w http.ResponseWriter, r *http.Request)
 // @Param name path string true "name of the country"
 // @Success 200 {object} AirPollutionEmissionsResponse
 // @Failure 400 {object} ErrResponse
-// @Failure 405 {object} ErrResponse
-// @Failure 500 {object} ErrResponse
+// @Failure 404 {object} ErrResponse
 func (rs EmissionResource) GetByCountry(w http.ResponseWriter, r *http.Request) {
 	name := chi.URLParam(r, "name")
 	if name == "" {
-		if err := render.Render(w, r, ErrRender(fmt.Sprintf("Country name missing"), 400)); err != nil {
-			render.Status(r, 500)
-		}
+		_ = render.Render(w, r, ErrInvalidRequest(errors.New(fmt.Sprintf("Country name missing"))))
 		return
 	}
 
@@ -201,7 +183,5 @@ func (rs EmissionResource) GetByCountry(w http.ResponseWriter, r *http.Request) 
 	}
 
 	response := newAirPollutionEmissionsResponse(countryEmissions)
-	if err := render.Render(w, r, response); err != nil {
-		render.Status(r, 500)
-	}
+	_ = render.Render(w, r, response)
 }

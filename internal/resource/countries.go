@@ -3,6 +3,7 @@ package resource
 import (
 	"air-pollution-service/internal/model"
 	"air-pollution-service/internal/store"
+	"errors"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
@@ -50,14 +51,11 @@ func (rs CountryResource) Routes() chi.Router {
 // @Router /countries/ [get]
 // @Success 200 {object} []CountryResponse
 // @Failure 400 {object} ErrResponse
-// @Failure 405 {object} ErrResponse
-// @Failure 500 {object} ErrResponse
+// @Failure 404 {object} ErrResponse
 func (rs CountryResource) List(w http.ResponseWriter, r *http.Request) {
 	countries := rs.Storage.GetCountries()
 	if countries == nil {
-		if err := render.Render(w, r, ErrRender(fmt.Sprintf("No country found"), 404)); err != nil {
-			render.Status(r, 500)
-		}
+		_ = render.Render(w, r, ErrNotFound())
 		return
 	}
 
@@ -66,11 +64,7 @@ func (rs CountryResource) List(w http.ResponseWriter, r *http.Request) {
 		response = append(response, newCountryResponse(article))
 	}
 
-	if err := render.RenderList(w, r, response); err != nil {
-		if err != nil {
-			render.Status(r, 500)
-		}
-	}
+	_ = render.RenderList(w, r, response)
 }
 
 // Get TODO
@@ -82,27 +76,20 @@ func (rs CountryResource) List(w http.ResponseWriter, r *http.Request) {
 // @Param name path string true "name of the country"
 // @Success 200 {object} CountryResponse
 // @Failure 400 {object} ErrResponse
-// @Failure 405 {object} ErrResponse
-// @Failure 500 {object} ErrResponse
+// @Failure 404 {object} ErrResponse
 func (rs CountryResource) Get(w http.ResponseWriter, r *http.Request) {
 	name := chi.URLParam(r, "name")
 	if name == "" {
-		if err := render.Render(w, r, ErrRender(fmt.Sprintf("Country name missing"), 400)); err != nil {
-			render.Status(r, 500)
-		}
+		_ = render.Render(w, r, ErrInvalidRequest(errors.New(fmt.Sprintf("Country name missing"))))
 		return
 	}
 
 	country := rs.Storage.GetCountry(name)
 	if country == nil {
-		if err := render.Render(w, r, ErrRender(fmt.Sprintf("No country with name %s found", name), 404)); err != nil {
-			render.Status(r, 500)
-		}
+		_ = render.Render(w, r, ErrNotFound())
 		return
 	}
 
 	response := newCountryResponse(country)
-	if err := render.Render(w, r, response); err != nil {
-		render.Status(r, 500)
-	}
+	_ = render.Render(w, r, response)
 }
