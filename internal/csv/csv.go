@@ -30,6 +30,7 @@ func New(fileName string) *File {
 }
 
 func (f *File) ReadRows() ([]*Row, error) {
+	log.Printf("Load data from %s ...", f.fileName)
 	csvFile, err := os.OpenFile(f.fileName, os.O_RDWR, os.ModePerm)
 	if err != nil {
 		return nil, err
