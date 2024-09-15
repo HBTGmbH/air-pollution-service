@@ -104,7 +104,7 @@ func TestEmissionsGetByCountry(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	ctx := chi.NewRouteContext()
 	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
-	ctx.URLParams.Add("name", "Schlaraffenland")
+	ctx.URLParams.Add("id", "Schlaraffenland")
 	emissionsHandler := EmissionResource{Storage: fakeEmissionsStorage{[]*model.Emissions{{
 		NOxEmissions: 10,
 	}, {

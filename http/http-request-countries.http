@@ -3,7 +3,8 @@
 # {
 #     {
 #         "name": "Barbados",
-#         "code": "BRB"
+#         "code": "BRB",
+#         "id": "brb",
 #     },
 #     ...
 # }
@@ -14,9 +15,10 @@ GET {{url}}:{{port}}/countries/
 # expected response:
 # {
 #     "name": "Germany",
-#     "code": "DEU"
+#     "code": "DEU",
+#     "id": "deu"
 # }
-GET {{url}}:{{port}}/countries/Germany
+GET {{url}}:{{port}}/countries/deu
 
 > {%
     client.test("Request executed successfully", function() {
@@ -29,7 +31,8 @@ GET {{url}}:{{port}}/countries/Germany
     });
 
     client.test("Country is valid", function() {
-        client.assert(response.body.hasOwnProperty("code"), "Cannot find 'name' in response");
+        client.assert(response.body.hasOwnProperty("id"), "Cannot find 'id' in response");
         client.assert(response.body.hasOwnProperty("code"), "Cannot find 'code' in response");
+        client.assert(response.body.hasOwnProperty("name"), "Cannot find 'name' in response");
     });
 %}

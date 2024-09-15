@@ -12,15 +12,15 @@ The required raw data can be downloaded here https://www.kaggle.com/datasets/rej
 
 ## 💡 Endpoints
 
-| Name                                              | HTTP Method | Route                     |
-|---------------------------------------------------|-------------|---------------------------|
-| OpenAPI Documentation                             | GET         | /swagger/index.html       |
-| List all countries                                | GET         | /countries                |
-| Returns a single country                          | GET         | /countries/{name}         |
-| List all emissions of all countries for each year | GET         | /emissions/year/          |
-| Get all emissions of a specific year              | GET         | /emissions/year/{year}    |
-| List all emissions of all years for each country  | GET         | /emissions/country/       |
-| Get all emissions of a specific country           | GET         | /emissions/country/{name} |
+| Name                                              | HTTP Method | Route                   |
+|---------------------------------------------------|-------------|-------------------------|
+| OpenAPI Documentation                             | GET         | /swagger/index.html     |
+| List all countries                                | GET         | /countries              |
+| Returns a single country                          | GET         | /countries/{name}       |
+| List all emissions of all countries for each year | GET         | /emissions/year/        |
+| Get all emissions of a specific year              | GET         | /emissions/year/{id}    |
+| List all emissions of all years for each country  | GET         | /emissions/country/     |
+| Get all emissions of a specific country           | GET         | /emissions/country/{id} |
 
 ## 🚀 How to run
 

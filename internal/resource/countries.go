@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"net/http"
+	"strings"
 )
 
 type CountryResource struct {
@@ -18,7 +19,7 @@ func (rs CountryResource) Routes() chi.Router {
 
 	r.Get("/", rs.List)
 
-	r.Route("/{name}", func(r chi.Router) {
+	r.Route("/{id}", func(r chi.Router) {
 		r.Get("/", rs.Get)
 	})
 
@@ -50,23 +51,23 @@ func (rs CountryResource) List(w http.ResponseWriter, r *http.Request) {
 }
 
 // Get returns a single country
-// @Summary Get country by its name
-// @Description Returns a single country by name
+// @Summary Get country by its code
+// @Description Returns a single country by code
 // @Tags country
 // @Produce json
-// @Router /countries/{name} [get]
-// @Param name path string true "name of the country"
+// @Router /countries/{id} [get]
+// @Param id path string true "ID of the country, case-insensitive"
 // @Success 200 {object} CountryResponse
 // @Failure 400 {object} ErrResponse
 // @Failure 404 {object} ErrResponse
 func (rs CountryResource) Get(w http.ResponseWriter, r *http.Request) {
-	name := chi.URLParam(r, "name")
-	if name == "" {
-		_ = render.Render(w, r, ErrInvalidRequest(errors.New(fmt.Sprintf("Country name missing"))))
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		_ = render.Render(w, r, ErrInvalidRequest(errors.New(fmt.Sprintf("Country id missing"))))
 		return
 	}
 
-	country := rs.Storage.GetCountry(name)
+	country := rs.Storage.GetCountry(strings.ToLower(id))
 	if country == nil {
 		_ = render.Render(w, r, ErrNotFound())
 		return

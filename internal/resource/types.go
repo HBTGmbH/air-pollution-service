@@ -9,12 +9,14 @@ import (
 
 // CountryResponse renderer type for country data
 type countryResponse struct {
+	Id   string `json:"id"`
 	Name string `json:"name"`
 	Code string `json:"code"`
 } // @name CountryResponse
 
 func newCountryResponse(country *model.Country) countryResponse {
 	return countryResponse{
+		Id:   country.Id,
 		Name: country.Name,
 		Code: country.Code,
 	}

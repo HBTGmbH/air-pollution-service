@@ -54,4 +54,4 @@ GET {{url}}:{{port}}/emissions/country/
 #     },
 #     ...
 # }
-GET {{url}}:{{port}}/emissions/country/Zimbabwe
+GET {{url}}:{{port}}/emissions/country/png

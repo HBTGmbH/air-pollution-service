@@ -4,6 +4,7 @@ import (
 	"air-pollution-service/internal/csv"
 	"air-pollution-service/internal/model"
 	"fmt"
+	"strings"
 )
 
 type Store struct {
@@ -15,8 +16,8 @@ type Storage interface {
 	FindAllByYears() map[int][]*model.Emissions
 	FindAllByYear(year int) map[string]*model.Emissions
 	FindAllByCountries() map[string][]*model.Emissions
-	FindAllByCountry(name string) map[int]*model.Emissions
-	GetCountry(name string) *model.Country
+	FindAllByCountry(id string) map[int]*model.Emissions
+	GetCountry(id string) *model.Country
 	GetCountries() []*model.Country
 }
 
@@ -42,20 +43,33 @@ func New(file *csv.File) (*Store, error) {
 	}, nil
 }
 
-func toCountryEmissions(rowsFromFile []*csv.Row) (map[string]map[int]model.Emissions, error) {
+func toCountryId(row *csv.Row) string {
+	var id string
+	if row.Code == "" {
+		id = strings.ToLower(row.Entity)
+	} else {
+		id = strings.ToLower(row.Code)
+	}
+	id = strings.ReplaceAll(id, " ", "-")
+	return id
+}
+
+func toCountryEmissions(rows []*csv.Row) (map[string]map[int]model.Emissions, error) {
 	emissions := make(map[string]map[int]model.Emissions)
-	for _, row := range rowsFromFile {
-		_, exists := emissions[row.Entity]
+	for _, row := range rows {
+		id := toCountryId(row)
+
+		_, exists := emissions[id]
 		if !exists {
-			emissions[row.Entity] = make(map[int]model.Emissions)
+			emissions[id] = make(map[int]model.Emissions)
 		}
 
-		_, exists = emissions[row.Entity][row.Year]
+		_, exists = emissions[id][row.Year]
 		if exists {
-			return nil, fmt.Errorf("duplicate emissions for year %d and country %s", row.Year, row.Entity)
+			return nil, fmt.Errorf("duplicate emissions for year %d and country %s and code %s", row.Year, row.Entity, row.Code)
 		}
 
-		emissions[row.Entity][row.Year] = model.Emissions{
+		emissions[id][row.Year] = model.Emissions{
 			NOxEmissions:   row.NOxEmissions,
 			SO2Emissions:   row.SO2Emissions,
 			COEmissions:    row.COEmissions,
@@ -68,14 +82,16 @@ func toCountryEmissions(rowsFromFile []*csv.Row) (map[string]map[int]model.Emiss
 	return emissions, nil
 }
 
-func toCountries(rowsFromFile []*csv.Row) (map[string]model.Country, error) {
+func toCountries(rows []*csv.Row) (map[string]model.Country, error) {
 	countries := make(map[string]model.Country)
-	for _, row := range rowsFromFile {
-		_, exists := countries[row.Entity]
+	for _, row := range rows {
+		id := toCountryId(row)
+		_, exists := countries[id]
 		if exists {
 			continue
 		}
-		countries[row.Entity] = model.Country{
+		countries[id] = model.Country{
+			Id:   id,
 			Name: row.Entity,
 			Code: row.Code,
 		}
@@ -100,10 +116,10 @@ func (s *Store) FindAllByYears() map[int][]*model.Emissions {
 
 func (s *Store) FindAllByYear(year int) map[string]*model.Emissions {
 	emissions := make(map[string]*model.Emissions)
-	for name, countryEmissions := range s.emissions {
+	for id, countryEmissions := range s.emissions {
 		countryEmissionsOfYear, found := countryEmissions[year]
 		if found {
-			emissions[name] = &countryEmissionsOfYear
+			emissions[id] = &countryEmissionsOfYear
 		}
 	}
 	return emissions
@@ -111,25 +127,25 @@ func (s *Store) FindAllByYear(year int) map[string]*model.Emissions {
 
 func (s *Store) FindAllByCountries() map[string][]*model.Emissions {
 	emissions := make(map[string][]*model.Emissions)
-	for name, countryEmissions := range s.emissions {
-		emissions[name] = []*model.Emissions{}
+	for id, countryEmissions := range s.emissions {
+		emissions[id] = []*model.Emissions{}
 		for _, countryEmissionsOfYear := range countryEmissions {
-			emissions[name] = append(emissions[name], &countryEmissionsOfYear)
+			emissions[id] = append(emissions[id], &countryEmissionsOfYear)
 		}
 	}
 	return emissions
 }
 
-func (s *Store) FindAllByCountry(name string) map[int]*model.Emissions {
+func (s *Store) FindAllByCountry(id string) map[int]*model.Emissions {
 	emissions := make(map[int]*model.Emissions)
-	for year, countryEmissionsOfYear := range s.emissions[name] {
+	for year, countryEmissionsOfYear := range s.emissions[id] {
 		emissions[year] = &countryEmissionsOfYear
 	}
 	return emissions
 }
 
-func (s *Store) GetCountry(name string) *model.Country {
-	country, exists := s.countries[name]
+func (s *Store) GetCountry(id string) *model.Country {
+	country, exists := s.countries[id]
 	if exists {
 		return &country
 	}

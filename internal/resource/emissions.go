@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/render"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type EmissionResource struct {
@@ -26,7 +27,7 @@ func (rs EmissionResource) Routes() chi.Router {
 
 	r.Route("/country/", func(r chi.Router) {
 		r.Get("/", rs.ListByCountry)
-		r.Get("/{name}", rs.GetByCountry)
+		r.Get("/{id}", rs.GetByCountry)
 	})
 
 	return r
@@ -101,20 +102,20 @@ func (rs EmissionResource) ListByCountry(w http.ResponseWriter, r *http.Request)
 // @Description All historical emissions data of a country accumulated over all years, available in the database
 // @Tags emission country
 // @Produce json
-// @Router /emissions/country/{name} [get]
-// @Param name path string true "name of the country"
+// @Router /emissions/country/{id} [get]
+// @Param id path string true "id of the country, case-insensitive"
 // @Success 200 {object} AirPollutionResponse
 // @Failure 400 {object} ErrResponse
 // @Failure 404 {object} ErrResponse
 func (rs EmissionResource) GetByCountry(w http.ResponseWriter, r *http.Request) {
-	name := chi.URLParam(r, "name")
-	if name == "" {
-		_ = render.Render(w, r, ErrInvalidRequest(errors.New(fmt.Sprintf("Country name missing"))))
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		_ = render.Render(w, r, ErrInvalidRequest(errors.New(fmt.Sprintf("Country id missing"))))
 		return
 	}
 
 	var countryEmissions []*model.Emissions
-	for _, emissions := range rs.Storage.FindAllByCountry(name) {
+	for _, emissions := range rs.Storage.FindAllByCountry(strings.ToLower(id)) {
 		countryEmissions = append(countryEmissions, emissions)
 	}
 

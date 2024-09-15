@@ -48,7 +48,7 @@ func TestCountriesGetNonExisting(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	ctx := chi.NewRouteContext()
 	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
-	ctx.URLParams.Add("name", "Schlaraffenland")
+	ctx.URLParams.Add("id", "Schlaraffenland")
 	countryHandler := CountryResource{Storage: fakeCountryStorage{[]*model.Country{}}}
 
 	countryHandler.Get(w, req)
@@ -64,10 +64,11 @@ func TestCountriesGetExisting(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	ctx := chi.NewRouteContext()
 	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
-	ctx.URLParams.Add("name", "Schlaraffenland")
+	ctx.URLParams.Add("id", "Schlaraffenland")
 	countryHandler := CountryResource{Storage: fakeCountryStorage{[]*model.Country{{
 		Name: "Schlaraffenland",
 		Code: "SCH",
+		Id:   "sch",
 	}}}}
 
 	countryHandler.Get(w, req)
@@ -82,4 +83,5 @@ func TestCountriesGetExisting(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "Schlaraffenland", country.Name)
 	assert.Equal(t, "SCH", country.Code)
+	assert.Equal(t, "sch", country.Id)
 }
