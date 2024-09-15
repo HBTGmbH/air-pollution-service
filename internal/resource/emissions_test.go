@@ -125,7 +125,7 @@ func TestEmissionsGetByCountry(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 5.0, airPollutionEmissions.NOxEmissions.Average)
 	assert.Equal(t, 3.0, airPollutionEmissions.NOxEmissions.Median)
-	assert.Equal(t, 3.559026084010437, airPollutionEmissions.NOxEmissions.StandardDeviation)
+	assert.Equal(t, 3.56, airPollutionEmissions.NOxEmissions.StandardDeviation)
 }
 
 func TestEmissionsGetByYear(t *testing.T) {
@@ -154,5 +154,5 @@ func TestEmissionsGetByYear(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 5.0, airPollutionEmissions.NOxEmissions.Average)
 	assert.Equal(t, 3.0, airPollutionEmissions.NOxEmissions.Median)
-	assert.Equal(t, 3.559026084010437, airPollutionEmissions.NOxEmissions.StandardDeviation)
+	assert.Equal(t, 3.56, airPollutionEmissions.NOxEmissions.StandardDeviation)
 }

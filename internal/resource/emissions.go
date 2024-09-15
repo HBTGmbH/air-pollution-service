@@ -3,7 +3,6 @@ package resource
 import (
 	"air-pollution-service/internal/model"
 	"air-pollution-service/internal/store"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/go-chi/chi/v5"
@@ -49,7 +48,7 @@ func (rs EmissionResource) ListByYear(w http.ResponseWriter, r *http.Request) {
 		response.Years[year] = newAirPollutionEmissionsResponse(emissions)
 	}
 
-	_ = json.NewEncoder(w).Encode(response)
+	_ = render.Render(w, r, response)
 }
 
 // GetByYear returns the emissions of all countries accumulated for a single year
@@ -94,7 +93,6 @@ func (rs EmissionResource) ListByCountry(w http.ResponseWriter, r *http.Request)
 	}
 
 	_ = render.Render(w, r, response)
-
 }
 
 // GetByCountry returns the emissions of all years accumulated for a single country

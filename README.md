@@ -16,7 +16,7 @@ The required raw data can be downloaded here https://www.kaggle.com/datasets/rej
 |---------------------------------------------------|-------------|-------------------------|
 | OpenAPI Documentation                             | GET         | /swagger/index.html     |
 | List all countries                                | GET         | /countries              |
-| Returns a single country                          | GET         | /countries/{name}       |
+| Returns a single country                          | GET         | /countries/{id}         |
 | List all emissions of all countries for each year | GET         | /emissions/year/        |
 | Get all emissions of a specific year              | GET         | /emissions/year/{id}    |
 | List all emissions of all years for each country  | GET         | /emissions/country/     |

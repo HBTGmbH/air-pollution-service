@@ -50,21 +50,21 @@ const docTemplate = `{
                 }
             }
         },
-        "/countries/{name}": {
+        "/countries/{id}": {
             "get": {
-                "description": "Returns a single country by name",
+                "description": "Returns a single country by code",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "country"
                 ],
-                "summary": "Get country by its name",
+                "summary": "Get country by its code",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "name of the country",
-                        "name": "name",
+                        "description": "ID of the country, case-insensitive",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -111,7 +111,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/emissions/country/{name}": {
+        "/emissions/country/{id}": {
             "get": {
                 "description": "All historical emissions data of a country accumulated over all years, available in the database",
                 "produces": [
@@ -124,8 +124,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "name of the country",
-                        "name": "name",
+                        "description": "id of the country, case-insensitive",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -261,6 +261,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "code": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "string"
                 },
                 "name": {

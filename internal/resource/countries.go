@@ -51,8 +51,8 @@ func (rs CountryResource) List(w http.ResponseWriter, r *http.Request) {
 }
 
 // Get returns a single country
-// @Summary Get country by its code
-// @Description Returns a single country by code
+// @Summary Get country by its id
+// @Description Returns a single country by id
 // @Tags country
 // @Produce json
 // @Router /countries/{id} [get]

@@ -44,10 +44,15 @@ func newEmissionsResponse(emissions []*model.Emissions, f func(emission *model.E
 	}
 
 	median, _ := stats.Median(values)
+	median, _ = stats.Round(median, 2)
+
 	standardDeviation, _ := stats.StandardDeviation(values)
+	standardDeviation, _ = stats.Round(standardDeviation, 2)
+
+	average, _ := stats.Round(total/float64(len(emissions)), 2)
 
 	return EmissionsResponse{
-		Average:           total / float64(len(emissions)),
+		Average:           average,
 		Median:            median,
 		StandardDeviation: standardDeviation,
 	}
