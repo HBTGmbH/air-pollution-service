@@ -33,7 +33,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Docker image
-        run: docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.BUILD_ID }} .
+        run: docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.BUILD_ID }} -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest  .
 
       - name: Push Docker image to Docker Hub
-        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.BUILD_ID }}
+        run: docker push -a ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}

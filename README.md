@@ -42,7 +42,7 @@ go run main.go
 ### Docker
 * Download the raw data to a file, e.g. `/data/air-pollution.csv`.
 ```bash
-docker pull ghcr.io/hbtgmbh/air-pollution-service:20
+docker pull ghcr.io/hbtgmbh/air-pollution-service:latest
 docker run --mount type=bind,src=/dat,dst=/data --publish 8080:8080 --env AIR_POLLUTION_FILE=/data/air-pollution.csv ghcr.io/hbtgmbh/air-pollution-service:20
 ```
 
