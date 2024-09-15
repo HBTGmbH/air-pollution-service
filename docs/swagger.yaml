@@ -1,0 +1,219 @@
+definitions:
+  AirPollutionEmissionsResponse:
+    properties:
+      ammonia_emissions:
+        $ref: '#/definitions/AirPollutionResponse'
+      black_carbon_emissions:
+        $ref: '#/definitions/AirPollutionResponse'
+      carbon_monoxide_emissions:
+        $ref: '#/definitions/AirPollutionResponse'
+      nmvoc_emissions:
+        $ref: '#/definitions/AirPollutionResponse'
+      nox_emissions:
+        $ref: '#/definitions/AirPollutionResponse'
+      organic_carbon_emissions:
+        $ref: '#/definitions/AirPollutionResponse'
+      sulphur_dioxide_emissions:
+        $ref: '#/definitions/AirPollutionResponse'
+    type: object
+  AirPollutionResponse:
+    properties:
+      average:
+        type: number
+      median:
+        type: number
+      standard_deviation:
+        type: number
+    type: object
+  CountryResponse:
+    properties:
+      code:
+        type: string
+      name:
+        type: string
+    type: object
+  ErrResponse:
+    properties:
+      status:
+        type: integer
+      text:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /countries/:
+    get:
+      description: TODO
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/CountryResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrResponse'
+      summary: TODO
+      tags:
+      - country
+  /countries/{name}:
+    get:
+      description: TODO
+      parameters:
+      - description: name of the country
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/CountryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrResponse'
+      summary: TODO
+      tags:
+      - country
+  /emissions/country/:
+    get:
+      description: TODO
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/AirPollutionEmissionsResponse'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrResponse'
+      summary: TODO
+      tags:
+      - emission country
+  /emissions/country/{name}:
+    get:
+      description: TODO
+      parameters:
+      - description: name of the country
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AirPollutionEmissionsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrResponse'
+      summary: TODO
+      tags:
+      - emission country
+  /emissions/year/:
+    get:
+      description: TODO
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/AirPollutionEmissionsResponse'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrResponse'
+      summary: TODO
+      tags:
+      - emission year
+  /emissions/year/{year}:
+    get:
+      description: TODO
+      parameters:
+      - description: year
+        in: path
+        name: year
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AirPollutionEmissionsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrResponse'
+      summary: TODO
+      tags:
+      - emission year
+swagger: "2.0"

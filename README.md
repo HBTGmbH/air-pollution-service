@@ -14,6 +14,7 @@ The required raw data can be downloaded here https://www.kaggle.com/datasets/rej
 
 | Name                                              | HTTP Method | Route                     |
 |---------------------------------------------------|-------------|---------------------------|
+| OpenAPI Documentation                             | GET         | /swagger/index.html       |
 | List all countries                                | GET         | /countries                |
 | Returns a single country                          | GET         | /countries/{name}         |
 | List all emissions of all countries for each year | GET         | /emissions/year/          |
@@ -35,8 +36,7 @@ The required raw data can be downloaded here https://www.kaggle.com/datasets/rej
  * Point env variable `AIR_POLLUTION_FILE` to the file path. 
  * Run the service:
 ```bash
-go build cmd/server/main.go
-go go run cmd/server/main.go
+go run main.go
 ```
 
 ### Docker

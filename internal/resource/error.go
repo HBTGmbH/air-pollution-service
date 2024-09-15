@@ -5,10 +5,11 @@ import (
 	"net/http"
 )
 
+// ErrResponse renderer type for handling all sorts of errors.
 type ErrResponse struct {
 	HTTPStatusCode int    `json:"status"`
 	StatusText     string `json:"text"`
-}
+} // @name ErrResponse
 
 func ErrRender(message string, status int) render.Renderer {
 	return &ErrResponse{

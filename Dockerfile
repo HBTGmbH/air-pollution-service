@@ -7,7 +7,7 @@ COPY . .
 RUN go mod tidy
 RUN go get ./...
 
-RUN go build -ldflags '-w -s' -a -o ./bin/server ./cmd/server
+RUN go build -ldflags '-w -s' -a -o ./bin/server
 
 CMD ["/air-pollution-service/bin/server"]
 EXPOSE 8080

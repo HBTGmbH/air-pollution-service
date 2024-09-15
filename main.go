@@ -2,6 +2,7 @@ package main
 
 import (
 	"air-pollution-service/config"
+	_ "air-pollution-service/docs"
 	"air-pollution-service/internal/csv"
 	"air-pollution-service/internal/resource"
 	"air-pollution-service/internal/store"
@@ -10,6 +11,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"log"
 	"net/http"
 )
@@ -31,6 +33,8 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.URLFormat)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
+
+	r.Get("/swagger/*", httpSwagger.Handler())
 
 	r.Mount("/countries", resource.CountryResource{Storage: repo}.Routes())
 	r.Mount("/emissions", resource.EmissionResource{Storage: repo}.Routes())

@@ -13,10 +13,11 @@ type CountryResource struct {
 	Storage store.Storage
 }
 
+// CountryResponse TODO
 type countryResponse struct {
 	Name string `json:"name"`
 	Code string `json:"code"`
-}
+} // @name CountryResponse
 
 func newCountryResponse(country *model.Country) countryResponse {
 	return countryResponse{
@@ -41,6 +42,16 @@ func (rs CountryResource) Routes() chi.Router {
 	return r
 }
 
+// List TODO
+// @Summary TODO
+// @Description TODO
+// @Tags country
+// @Produce json
+// @Router /countries/ [get]
+// @Success 200 {object} []CountryResponse
+// @Failure 400 {object} ErrResponse
+// @Failure 405 {object} ErrResponse
+// @Failure 500 {object} ErrResponse
 func (rs CountryResource) List(w http.ResponseWriter, r *http.Request) {
 	countries := rs.Storage.GetCountries()
 	if countries == nil {
@@ -62,6 +73,17 @@ func (rs CountryResource) List(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Get TODO
+// @Summary TODO
+// @Description TODO
+// @Tags country
+// @Produce json
+// @Router /countries/{name} [get]
+// @Param name path string true "name of the country"
+// @Success 200 {object} CountryResponse
+// @Failure 400 {object} ErrResponse
+// @Failure 405 {object} ErrResponse
+// @Failure 500 {object} ErrResponse
 func (rs CountryResource) Get(w http.ResponseWriter, r *http.Request) {
 	name := chi.URLParam(r, "name")
 	if name == "" {

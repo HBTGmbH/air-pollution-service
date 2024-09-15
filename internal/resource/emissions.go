@@ -16,11 +16,12 @@ type EmissionResource struct {
 	Storage store.Storage
 }
 
+// AirPollutionResponse TODO
 type airPollutionResponse struct {
 	Average           float64 `json:"average"`
 	Median            float64 `json:"median"`
 	StandardDeviation float64 `json:"standard_deviation"`
-}
+} // @name AirPollutionResponse
 
 func newAirPollutionResponse(emissions []*model.Emissions, f func(emission *model.Emissions) float64) airPollutionResponse {
 	total := 0.0
@@ -42,6 +43,7 @@ func newAirPollutionResponse(emissions []*model.Emissions, f func(emission *mode
 	}
 }
 
+// AirPollutionEmissionsResponse TODO
 type airPollutionEmissionsResponse struct {
 	NOxEmissions   airPollutionResponse `json:"nox_emissions"`
 	SO2Emissions   airPollutionResponse `json:"sulphur_dioxide_emissions"`
@@ -50,7 +52,7 @@ type airPollutionEmissionsResponse struct {
 	NMVOCEmissions airPollutionResponse `json:"nmvoc_emissions"`
 	BCEmissions    airPollutionResponse `json:"black_carbon_emissions"`
 	NH3Emissions   airPollutionResponse `json:"ammonia_emissions"`
-}
+} // @name AirPollutionEmissionsResponse
 
 func newAirPollutionEmissionsResponse(emissions []*model.Emissions) airPollutionEmissionsResponse {
 	return airPollutionEmissionsResponse{
@@ -98,6 +100,16 @@ func (rs EmissionResource) Routes() chi.Router {
 	return r
 }
 
+// ListByYear TODO
+// @Summary TODO
+// @Description TODO
+// @Tags emission year
+// @Produce json
+// @Router /emissions/year/ [get]
+// @Success 200 {object} map[country]AirPollutionEmissionsResponse
+// @Failure 400 {object} ErrResponse
+// @Failure 405 {object} ErrResponse
+// @Failure 500 {object} ErrResponse
 func (rs EmissionResource) ListByYear(w http.ResponseWriter, r *http.Request) {
 	response := make(map[int]airPollutionEmissionsResponse)
 	for year, emissions := range rs.Storage.FindAllByYears() {
@@ -110,6 +122,17 @@ func (rs EmissionResource) ListByYear(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetByYear TODO
+// @Summary TODO
+// @Description TODO
+// @Tags emission year
+// @Produce json
+// @Router /emissions/year/{year} [get]
+// @Param year path string true "year"
+// @Success 200 {object} AirPollutionEmissionsResponse
+// @Failure 400 {object} ErrResponse
+// @Failure 405 {object} ErrResponse
+// @Failure 500 {object} ErrResponse
 func (rs EmissionResource) GetByYear(w http.ResponseWriter, r *http.Request) {
 	year, err := strconv.Atoi(chi.URLParam(r, "year"))
 	if err != nil {
@@ -130,6 +153,16 @@ func (rs EmissionResource) GetByYear(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ListByCountry TODO
+// @Summary TODO
+// @Description TODO
+// @Tags emission country
+// @Produce json
+// @Router /emissions/country/ [get]
+// @Success 200 {object} map[year]AirPollutionEmissionsResponse
+// @Failure 400 {object} ErrResponse
+// @Failure 405 {object} ErrResponse
+// @Failure 500 {object} ErrResponse
 func (rs EmissionResource) ListByCountry(w http.ResponseWriter, r *http.Request) {
 	response := make(map[string]airPollutionEmissionsResponse)
 	for country, emissions := range rs.Storage.FindAllByCountries() {
@@ -142,6 +175,17 @@ func (rs EmissionResource) ListByCountry(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+// GetByCountry TODO
+// @Summary TODO
+// @Description TODO
+// @Tags emission country
+// @Produce json
+// @Router /emissions/country/{name} [get]
+// @Param name path string true "name of the country"
+// @Success 200 {object} AirPollutionEmissionsResponse
+// @Failure 400 {object} ErrResponse
+// @Failure 405 {object} ErrResponse
+// @Failure 500 {object} ErrResponse
 func (rs EmissionResource) GetByCountry(w http.ResponseWriter, r *http.Request) {
 	name := chi.URLParam(r, "name")
 	if name == "" {
