@@ -87,7 +87,7 @@ paths:
       - country
   /countries/{id}:
     get:
-      description: Returns a single country by code
+      description: Returns a single country by id
       parameters:
       - description: ID of the country, case-insensitive
         in: path
@@ -109,7 +109,7 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/ErrResponse'
-      summary: Get country by its code
+      summary: Get country by its id
       tags:
       - country
   /emissions/country/:

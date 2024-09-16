@@ -52,14 +52,14 @@ const docTemplate = `{
         },
         "/countries/{id}": {
             "get": {
-                "description": "Returns a single country by code",
+                "description": "Returns a single country by id",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "country"
                 ],
-                "summary": "Get country by its code",
+                "summary": "Get country by its id",
                 "parameters": [
                     {
                         "type": "string",
