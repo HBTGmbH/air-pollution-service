@@ -1,0 +1,8 @@
+docker-compose.yaml
+Dockerfile
+.git/
+.github/
+.gitignore
+main_test.go
+Makefile
+README.md
