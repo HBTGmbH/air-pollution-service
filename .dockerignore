@@ -1,8 +1,10 @@
-docker-compose.yaml
-Dockerfile
+.dockerignore
 .git/
 .github/
 .gitignore
-main_test.go
+Dockerfile
 Makefile
 README.md
+docker-compose.yml
+http/
+main_test.go
