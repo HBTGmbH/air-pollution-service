@@ -1,5 +1,4 @@
-ARG GOVERSION=1.23.1-alpine3.20
-FROM golang:$GOVERSION AS builder
+FROM golang:1.23.1-alpine3.20 AS builder
 RUN apk add -q --no-cache tzdata
 WORKDIR /air-pollution-service
 ADD go.mod go.sum main.go ./
