@@ -1,5 +1,10 @@
 all: build
 
+# Setup the environment
+setup:
+	@echo "Setup..."
+	@go install github.com/swaggo/swag/cmd/swag@latest
+
 # Build the application
 build:
 	@echo "Building..."
@@ -24,4 +29,4 @@ swagger:
 	@echo "Update OpenAPI..."
 	@swag init
 
-.PHONY: all build run test clean watch
+.PHONY: all setup build run test clean watch
