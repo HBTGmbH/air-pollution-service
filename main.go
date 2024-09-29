@@ -6,11 +6,15 @@ import (
 	"air-pollution-service/internal/csv"
 	"air-pollution-service/internal/resource"
 	"air-pollution-service/internal/store"
+	"context"
+	"errors"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"log"
 	"net/http"
 	"os"
@@ -25,7 +29,7 @@ func main() {
 	// load raw data
 	repo, err := store.New(csv.New(conf.AirPollutionFile))
 	if err != nil {
-		log.Panicf("Unable to load raw data from %s", conf.AirPollutionFile)
+		log.Panicf("Unable to load raw data from %s: %s", conf.AirPollutionFile, err)
 	}
 
 	c := make(chan os.Signal, 1)
@@ -43,15 +47,25 @@ func main() {
 	r.Mount("/countries", resource.CountryResource{Storage: repo}.Routes())
 	r.Mount("/emissions", resource.EmissionResource{Storage: repo}.Routes())
 
+	h2s := &http2.Server{}
+	server := &http.Server{
+		Addr:    fmt.Sprintf(":%d", conf.Server.Port),
+		Handler: h2c.NewHandler(r, h2s),
+	}
+
 	// start the server
 	go func() {
-		if err := http.ListenAndServe(fmt.Sprintf(":%d", conf.Server.Port), r); err != nil {
-			log.Panicf("Failed to start server %s", err)
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Panicf("Failed to start server: %s", err)
 		}
 	}()
 
 	log.Printf("Server started sucessfully!")
 	<-c
-	log.Printf("Shutting down server!")
-	os.Exit(0)
+	log.Printf("Shutting down server gracefully...")
+	err = server.Shutdown(context.Background())
+	if err != nil {
+		log.Panicf("Failed to shutdown server: %s", err)
+	}
+	log.Printf("Server shutdown successfully. Exiting.")
 }
