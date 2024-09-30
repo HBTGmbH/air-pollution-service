@@ -8,21 +8,21 @@ import (
 )
 
 // CountryResponse renderer type for country data
-type countryResponse struct {
+type CountryResponse struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
 	Code string `json:"code"`
 } // @name CountryResponse
 
-func newCountryResponse(country *model.Country) countryResponse {
-	return countryResponse{
+func newCountryResponse(country *model.Country) CountryResponse {
+	return CountryResponse{
 		Id:   country.Id,
 		Name: country.Name,
 		Code: country.Code,
 	}
 }
 
-func (hr countryResponse) Render(w http.ResponseWriter, r *http.Request) error {
+func (hr CountryResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
