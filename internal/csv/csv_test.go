@@ -1,4 +1,4 @@
-package csv
+package csv_test
 
 import "testing"
 

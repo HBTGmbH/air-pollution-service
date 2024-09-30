@@ -1,12 +1,13 @@
-package resource
+package resource_test
 
 import (
 	"air-pollution-service/internal/model"
+	"air-pollution-service/internal/resource"
 	"context"
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -58,7 +59,7 @@ func TestEmissionsListByYear(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	ctx := chi.NewRouteContext()
 	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
-	emissionsHandler := EmissionResource{Storage: fakeEmissionsStorage{[]*model.Emissions{{
+	emissionsHandler := resource.EmissionResource{Storage: fakeEmissionsStorage{[]*model.Emissions{{
 		NOxEmissions: 1,
 	}, {
 		NOxEmissions: 2,
@@ -69,7 +70,7 @@ func TestEmissionsListByYear(t *testing.T) {
 	emissionsHandler.ListByYear(w, req)
 	res := w.Result()
 	defer res.Body.Close()
-	_, err := ioutil.ReadAll(res.Body)
+	_, err := io.ReadAll(res.Body)
 	assert.Nil(t, err)
 	assert.Equal(t, 200, res.StatusCode)
 
@@ -81,7 +82,7 @@ func TestEmissionsListByCountry(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	ctx := chi.NewRouteContext()
 	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
-	emissionsHandler := EmissionResource{Storage: fakeEmissionsStorage{[]*model.Emissions{{
+	emissionsHandler := resource.EmissionResource{Storage: fakeEmissionsStorage{[]*model.Emissions{{
 		NOxEmissions: 1,
 	}, {
 		NOxEmissions: 2,
@@ -92,7 +93,7 @@ func TestEmissionsListByCountry(t *testing.T) {
 	emissionsHandler.ListByCountry(w, req)
 	res := w.Result()
 	defer res.Body.Close()
-	_, err := ioutil.ReadAll(res.Body)
+	_, err := io.ReadAll(res.Body)
 	assert.Nil(t, err)
 	assert.Equal(t, 200, res.StatusCode)
 
@@ -105,7 +106,7 @@ func TestEmissionsGetByCountry(t *testing.T) {
 	ctx := chi.NewRouteContext()
 	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
 	ctx.URLParams.Add("id", "Schlaraffenland")
-	emissionsHandler := EmissionResource{Storage: fakeEmissionsStorage{[]*model.Emissions{{
+	emissionsHandler := resource.EmissionResource{Storage: fakeEmissionsStorage{[]*model.Emissions{{
 		NOxEmissions: 10,
 	}, {
 		NOxEmissions: 2,
@@ -116,11 +117,11 @@ func TestEmissionsGetByCountry(t *testing.T) {
 	emissionsHandler.GetByCountry(w, req)
 	res := w.Result()
 	defer res.Body.Close()
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.Nil(t, err)
 	assert.Equal(t, 200, res.StatusCode)
 
-	airPollutionEmissions := AirPollutionResponse{}
+	airPollutionEmissions := resource.AirPollutionResponse{}
 	err = json.Unmarshal(data, &airPollutionEmissions)
 	assert.Nil(t, err)
 	assert.Equal(t, 5.0, airPollutionEmissions.NOxEmissions.Average)
@@ -134,7 +135,7 @@ func TestEmissionsGetByYear(t *testing.T) {
 	ctx := chi.NewRouteContext()
 	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
 	ctx.URLParams.Add("year", "666")
-	emissionsHandler := EmissionResource{Storage: fakeEmissionsStorage{[]*model.Emissions{{
+	emissionsHandler := resource.EmissionResource{Storage: fakeEmissionsStorage{[]*model.Emissions{{
 		NOxEmissions: 10,
 	}, {
 		NOxEmissions: 2,
@@ -145,11 +146,11 @@ func TestEmissionsGetByYear(t *testing.T) {
 	emissionsHandler.GetByYear(w, req)
 	res := w.Result()
 	defer res.Body.Close()
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.Nil(t, err)
 	assert.Equal(t, 200, res.StatusCode)
 
-	airPollutionEmissions := AirPollutionResponse{}
+	airPollutionEmissions := resource.AirPollutionResponse{}
 	err = json.Unmarshal(data, &airPollutionEmissions)
 	assert.Nil(t, err)
 	assert.Equal(t, 5.0, airPollutionEmissions.NOxEmissions.Average)

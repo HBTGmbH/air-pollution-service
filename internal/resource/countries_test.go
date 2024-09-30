@@ -1,12 +1,13 @@
-package resource
+package resource_test
 
 import (
 	"air-pollution-service/internal/model"
+	"air-pollution-service/internal/resource"
 	"context"
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -49,12 +50,12 @@ func TestCountriesGetNonExisting(t *testing.T) {
 	ctx := chi.NewRouteContext()
 	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
 	ctx.URLParams.Add("id", "Schlaraffenland")
-	countryHandler := CountryResource{Storage: fakeCountryStorage{[]*model.Country{}}}
+	countryHandler := resource.CountryResource{Storage: fakeCountryStorage{[]*model.Country{}}}
 
 	countryHandler.Get(w, req)
 	res := w.Result()
 	defer res.Body.Close()
-	_, err := ioutil.ReadAll(res.Body)
+	_, err := io.ReadAll(res.Body)
 	assert.Nil(t, err)
 	assert.Equal(t, 404, res.StatusCode)
 }
@@ -65,7 +66,7 @@ func TestCountriesGetExisting(t *testing.T) {
 	ctx := chi.NewRouteContext()
 	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
 	ctx.URLParams.Add("id", "Schlaraffenland")
-	countryHandler := CountryResource{Storage: fakeCountryStorage{[]*model.Country{{
+	countryHandler := resource.CountryResource{Storage: fakeCountryStorage{[]*model.Country{{
 		Name: "Schlaraffenland",
 		Code: "SCH",
 		Id:   "sch",
@@ -74,11 +75,11 @@ func TestCountriesGetExisting(t *testing.T) {
 	countryHandler.Get(w, req)
 	res := w.Result()
 	defer res.Body.Close()
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.Nil(t, err)
 	assert.Equal(t, 200, res.StatusCode)
 
-	country := countryResponse{}
+	country := resource.CountryResponse{}
 	err = json.Unmarshal(data, &country)
 	assert.Nil(t, err)
 	assert.Equal(t, "Schlaraffenland", country.Name)
