@@ -21,6 +21,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 func main() {
@@ -63,7 +64,22 @@ func main() {
 	}()
 
 	log.Printf("Server started sucessfully!")
-	<-c
+	sig := <-c
+	if sig == syscall.SIGTERM {
+		// Build "sleep before shutdown" into the application to handle deployment
+		// scenarios where the service might still receive traffic after a shutdown
+		// such as in a Kubernetes rolling deployment/update. This will allow the
+		// service to gracefully shutdown after a configurable duration after we can
+		// be sure that all traffic has been shifted to the new version.
+		// See also: https://learnk8s.io/graceful-shutdown
+		parsedSleepDuration, err := time.ParseDuration(conf.SleepDurationBeforeShutdown)
+		if err != nil {
+			log.Printf("Failed to parse SLEEP_DURATION_BEFORE_SHUTDOWN duration %s. Won't sleep: %s", conf.SleepDurationBeforeShutdown, err)
+		} else {
+			log.Printf("Waiting for %s before shutting down...", parsedSleepDuration.String())
+			time.Sleep(parsedSleepDuration)
+		}
+	}
 	log.Printf("Shutting down server gracefully...")
 	err = server.Shutdown(context.Background())
 	if err != nil {
