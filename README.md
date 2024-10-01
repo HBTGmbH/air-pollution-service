@@ -21,6 +21,7 @@ The required raw data can be downloaded here https://www.kaggle.com/datasets/rej
 | Get all emissions of a specific year              | GET         | /emissions/year/{id}    |
 | List all emissions of all years for each country  | GET         | /emissions/country/     |
 | Get all emissions of a specific country           | GET         | /emissions/country/{id} |
+| Prometheus Metrics                                | GET         | /metrics                |
 
 ## 🚀 How to run
 

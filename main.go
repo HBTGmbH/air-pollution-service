@@ -12,6 +12,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -43,6 +44,7 @@ func main() {
 	r.Use(middleware.URLFormat)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
+	r.Get("/metrics", promhttp.Handler().ServeHTTP)
 	r.Get("/swagger/*", httpSwagger.Handler())
 	r.Mount("/countries", resource.CountryResource{Storage: repo}.Routes())
 	r.Mount("/emissions", resource.EmissionResource{Storage: repo}.Routes())
