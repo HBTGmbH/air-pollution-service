@@ -72,9 +72,9 @@ func main() {
 		// service to gracefully shutdown after a configurable duration after we can
 		// be sure that all traffic has been shifted to the new version.
 		// See also: https://learnk8s.io/graceful-shutdown
-		parsedSleepDuration, err := time.ParseDuration(conf.SleepDurationBeforeShutdown)
+		parsedSleepDuration, err := time.ParseDuration(conf.Server.SleepDurationBeforeShutdown)
 		if err != nil {
-			log.Printf("Failed to parse SLEEP_DURATION_BEFORE_SHUTDOWN duration %s. Won't sleep: %s", conf.SleepDurationBeforeShutdown, err)
+			log.Printf("Failed to parse SLEEP_DURATION_BEFORE_SHUTDOWN duration %s. Won't sleep: %s", conf.Server.SleepDurationBeforeShutdown, err)
 		} else {
 			log.Printf("Waiting for %s before shutting down...", parsedSleepDuration.String())
 			time.Sleep(parsedSleepDuration)
