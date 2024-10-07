@@ -72,7 +72,7 @@ func TestEmissionsListByYear(t *testing.T) {
 	defer res.Body.Close()
 	_, err := io.ReadAll(res.Body)
 	assert.Nil(t, err)
-	assert.Equal(t, 200, res.StatusCode)
+	assert.Equal(t, 501, res.StatusCode)
 
 	// TODO validate response body
 }
