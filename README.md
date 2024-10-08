@@ -36,6 +36,17 @@ The required raw data can be downloaded here https://www.kaggle.com/datasets/rej
  * Download the raw data to a file, e.g. `/data/air-pollution.csv`.
  * Point env variable `AIR_POLLUTION_FILE` to the file path. 
  * Run the service:
+
+#### Without cloning the Git repository
+When the Go SDK is installed, the service can be installed and run with the following commands:
+```bash
+go install github.com/HBTGmbH/air-pollution-service@latest
+air-pollution-service
+```
+The binary `air-pollution-service` is now available in the `$GOPATH/bin` directory, such as `~/go/bin/` by default.
+
+#### With cloning the Git repository
+When working with the source code, the service can be run with the following command:
 ```bash
 go run main.go
 ```
