@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/HBTGmbH/air-pollution-service/config"
+	_ "github.com/HBTGmbH/air-pollution-service/docs"
 	"github.com/HBTGmbH/air-pollution-service/internal/csv"
 	"github.com/HBTGmbH/air-pollution-service/internal/resource"
 	"github.com/HBTGmbH/air-pollution-service/internal/store"
