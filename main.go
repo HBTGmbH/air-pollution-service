@@ -1,14 +1,13 @@
 package main
 
 import (
-	"air-pollution-service/config"
-	_ "air-pollution-service/docs"
-	"air-pollution-service/internal/csv"
-	"air-pollution-service/internal/resource"
-	"air-pollution-service/internal/store"
 	"context"
 	"errors"
 	"fmt"
+	"github.com/HBTGmbH/air-pollution-service/config"
+	"github.com/HBTGmbH/air-pollution-service/internal/csv"
+	"github.com/HBTGmbH/air-pollution-service/internal/resource"
+	"github.com/HBTGmbH/air-pollution-service/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"

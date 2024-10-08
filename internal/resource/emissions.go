@@ -1,10 +1,10 @@
 package resource
 
 import (
-	"air-pollution-service/internal/model"
-	"air-pollution-service/internal/store"
 	"errors"
 	"fmt"
+	"github.com/HBTGmbH/air-pollution-service/internal/model"
+	"github.com/HBTGmbH/air-pollution-service/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"net/http"

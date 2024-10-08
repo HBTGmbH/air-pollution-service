@@ -1,7 +1,7 @@
 package resource
 
 import (
-	"air-pollution-service/internal/model"
+	"github.com/HBTGmbH/air-pollution-service/internal/model"
 	"github.com/go-chi/render"
 	"github.com/montanaflynn/stats"
 	"net/http"

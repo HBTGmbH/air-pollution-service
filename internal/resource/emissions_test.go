@@ -1,10 +1,10 @@
 package resource_test
 
 import (
-	"air-pollution-service/internal/model"
-	"air-pollution-service/internal/resource"
 	"context"
 	"encoding/json"
+	"github.com/HBTGmbH/air-pollution-service/internal/model"
+	"github.com/HBTGmbH/air-pollution-service/internal/resource"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 	"io"

@@ -1,4 +1,4 @@
-module air-pollution-service
+module github.com/HBTGmbH/air-pollution-service
 
 go 1.22.0
 

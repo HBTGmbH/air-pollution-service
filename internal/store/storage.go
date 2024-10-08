@@ -1,9 +1,9 @@
 package store
 
 import (
-	"air-pollution-service/internal/csv"
-	"air-pollution-service/internal/model"
 	"fmt"
+	"github.com/HBTGmbH/air-pollution-service/internal/csv"
+	"github.com/HBTGmbH/air-pollution-service/internal/model"
 	"strings"
 )
 
