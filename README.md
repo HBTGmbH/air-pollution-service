@@ -1,6 +1,6 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/HBTGmbH/air-pollution-service.svg)](https://pkg.go.dev/github.com/HBTGmbH/air-pollution-service) 
 [![Go Report Card](https://goreportcard.com/badge/github.com/HBTGmbH/air-pollution-service)](https://goreportcard.com/report/github.com/HBTGmbH/air-pollution-service) 
-[![build workflow](https://github.com/HBTGmbH/air-pollution-service/actions/workflows/docker-build.yml/badge.svg)](https://github.com/HBTGmbH/air-pollution-service/actions/workflows/docker-build.yml)
+[![build workflow](https://github.com/HBTGmbH/air-pollution-service/actions/workflows/build.yml/badge.svg)](https://github.com/HBTGmbH/air-pollution-service/actions/workflows/build.yml)
 
 # Air Pollution Service 🌱
 A simple Go service that provides a RESTful API for retrieving emission and air pollution data for 
