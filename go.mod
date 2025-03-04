@@ -1,8 +1,7 @@
 module github.com/HBTGmbH/air-pollution-service
 
 go 1.22.0
-
-toolchain go1.22.5
+toolchain go1.23.7
 
 require (
 	github.com/go-chi/chi/v5 v5.2.1
@@ -14,7 +13,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/swaggo/http-swagger v1.3.4
 	github.com/swaggo/swag v1.16.4
-	golang.org/x/net v0.35.0
+	golang.org/x/net v0.36.0
 )
 
 require (
