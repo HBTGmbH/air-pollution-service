@@ -1,4 +1,4 @@
-FROM golang:1.23.3-alpine3.20 AS builder
+FROM golang:1.24.2-alpine3.21 AS builder
 WORKDIR /app
 RUN apk add -q --no-cache tzdata \
  && mkdir -p ./build/usr/share && cp -R /usr/share/zoneinfo ./build/usr/share/
