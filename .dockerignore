@@ -2,9 +2,11 @@
 .git/
 .github/
 .gitignore
+.idea/
 Dockerfile
 Makefile
 README.md
+air-pollution.csv
 docker-compose.yml
 http/
 main_test.go
