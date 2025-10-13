@@ -3,7 +3,7 @@ name: Test
 on:
   push:
     branches-ignore:
-      main
+      - main
   workflow_call:
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24.x'
+          go-version: "1.25.x"
 
       - name: Install Dependencies
         run: go get ./...
