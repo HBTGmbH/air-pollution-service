@@ -4,6 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"github.com/HBTGmbH/air-pollution-service/config"
 	_ "github.com/HBTGmbH/air-pollution-service/docs"
 	"github.com/HBTGmbH/air-pollution-service/internal/csv"
@@ -16,12 +23,6 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
-	"log"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 )
 
 func main() {

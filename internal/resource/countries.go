@@ -3,11 +3,12 @@ package resource
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/HBTGmbH/air-pollution-service/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"net/http"
-	"strings"
 )
 
 type CountryResource struct {

@@ -1,9 +1,10 @@
 package csv
 
 import (
-	"github.com/gocarina/gocsv"
 	"log"
 	"os"
+
+	"github.com/gocarina/gocsv"
 )
 
 type Row struct {

@@ -2,9 +2,10 @@ package store
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/HBTGmbH/air-pollution-service/internal/csv"
 	"github.com/HBTGmbH/air-pollution-service/internal/model"
-	"strings"
 )
 
 type Store struct {

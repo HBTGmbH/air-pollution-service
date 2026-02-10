@@ -3,15 +3,16 @@ package resource_test
 import (
 	"context"
 	"encoding/json"
-	"github.com/HBTGmbH/air-pollution-service/internal/model"
-	"github.com/HBTGmbH/air-pollution-service/internal/resource"
-	"github.com/go-chi/chi/v5"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"testing"
+
+	"github.com/HBTGmbH/air-pollution-service/internal/model"
+	"github.com/HBTGmbH/air-pollution-service/internal/resource"
+	"github.com/go-chi/chi/v5"
+	"github.com/stretchr/testify/assert"
 )
 
 type fakeEmissionsStorage struct {

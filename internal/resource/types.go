@@ -1,10 +1,11 @@
 package resource
 
 import (
+	"net/http"
+
 	"github.com/HBTGmbH/air-pollution-service/internal/model"
 	"github.com/go-chi/render"
 	"github.com/montanaflynn/stats"
-	"net/http"
 )
 
 // CountryResponse renderer type for country data

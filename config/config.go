@@ -1,8 +1,9 @@
 package config
 
 import (
-	"github.com/joeshaw/envdecode"
 	"log"
+
+	"github.com/joeshaw/envdecode"
 )
 
 type Conf struct {
@@ -13,6 +14,7 @@ type Conf struct {
 type ConfServer struct {
 	Port                        int    `env:"SERVER_PORT,default=8080"`
 	SleepDurationBeforeShutdown string `env:"SLEEP_DURATION_BEFORE_SHUTDOWN,default=10s"`
+	ConnectionDrainTimeout      string `env:"CONNECTION_DRAIN_TIMEOUT,default=30s"`
 }
 
 func New() *Conf {

@@ -3,13 +3,14 @@ package resource
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
+
 	"github.com/HBTGmbH/air-pollution-service/internal/model"
 	"github.com/HBTGmbH/air-pollution-service/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"net/http"
-	"strconv"
-	"strings"
 )
 
 type EmissionResource struct {
