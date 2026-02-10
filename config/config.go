@@ -13,11 +13,11 @@ type Conf struct {
 }
 
 type ConfServer struct {
-	Port                        int           `env:"SERVER_PORT" envDefault:"8080"`
-	IdleTimeout                 time.Duration `env:"SERVER_IDLE_TIMEOUT" envDefault:"75s"`
-	SleepDurationBeforeShutdown time.Duration `env:"SERVER_SLEEP_DURATION_BEFORE_SHUTDOWN" envDefault:"0s"`
-	DrainTimeout                time.Duration `env:"SERVER_DRAIN_TIMEOUT" envDefault:"30s"`
-	ShutdownTimeout             time.Duration `env:"SERVER_SHUTDOWN_TIMEOUT" envDefault:"30s"`
+	Port                  int           `env:"SERVER_PORT" envDefault:"8080"`
+	IdleTimeout           time.Duration `env:"SERVER_IDLE_TIMEOUT" envDefault:"60s"`
+	ShutdownSleepDuration time.Duration `env:"SERVER_SHUTDOWN_SLEEP_DURATION" envDefault:"0s"`
+	DrainTimeout          time.Duration `env:"SERVER_DRAIN_TIMEOUT" envDefault:"30s"`
+	ShutdownTimeout       time.Duration `env:"SERVER_SHUTDOWN_TIMEOUT" envDefault:"30s"`
 }
 
 func New() *Conf {

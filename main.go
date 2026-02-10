@@ -5,9 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -16,13 +18,17 @@ import (
 	"github.com/HBTGmbH/air-pollution-service/internal/csv"
 	"github.com/HBTGmbH/air-pollution-service/internal/resource"
 	"github.com/HBTGmbH/air-pollution-service/internal/store"
+	"github.com/HBTGmbH/air-pollution-service/internal/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	httpSwagger "github.com/swaggo/http-swagger"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
+)
+
+var (
+	draining             = atomic.Bool{}
+	openConnectionsCount int64
 )
 
 func main() {
@@ -40,6 +46,7 @@ func main() {
 
 	// build API router
 	r := chi.NewRouter()
+	r.Use(util.WithConnectionDraining(func() bool { return draining.Load() }))
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -51,10 +58,20 @@ func main() {
 	r.Mount("/countries", resource.CountryResource{Storage: repo}.Routes())
 	r.Mount("/emissions", resource.EmissionResource{Storage: repo}.Routes())
 
-	h2s := &http2.Server{}
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", conf.Server.Port),
-		Handler: h2c.NewHandler(r, h2s),
+		Addr:        fmt.Sprintf(":%d", conf.Server.Port),
+		Handler:     r,
+		IdleTimeout: conf.Server.IdleTimeout,
+		ConnState: func(conn net.Conn, state http.ConnState) {
+			switch state {
+			case http.StateNew:
+				atomic.AddInt64(&openConnectionsCount, 1)
+			case http.StateClosed, http.StateHijacked:
+				atomic.AddInt64(&openConnectionsCount, -1)
+			default:
+				// no-op
+			}
+		},
 	}
 
 	// start the server
@@ -65,26 +82,35 @@ func main() {
 	}()
 
 	log.Printf("Server started sucessfully!")
-	sig := <-c
-	if sig == syscall.SIGTERM {
-		// Build "sleep before shutdown" into the application to handle deployment
-		// scenarios where the service might still receive traffic after a shutdown
-		// such as in a Kubernetes rolling deployment/update. This will allow the
-		// service to gracefully shutdown after a configurable duration after we can
-		// be sure that all traffic has been shifted to the new version.
-		// See also: https://learnk8s.io/graceful-shutdown
-		parsedSleepDuration, err := time.ParseDuration(conf.Server.SleepDurationBeforeShutdown)
-		if err != nil {
-			log.Printf("Failed to parse SLEEP_DURATION_BEFORE_SHUTDOWN duration %s. Won't sleep: %s", conf.Server.SleepDurationBeforeShutdown, err)
-		} else {
-			log.Printf("Waiting for %s before shutting down...", parsedSleepDuration.String())
-			time.Sleep(parsedSleepDuration)
+	_ = <-c
+	gracefulShutdown(server, conf)
+}
+
+func gracefulShutdown(server *http.Server, conf *config.Conf) {
+	if conf.Server.ShutdownSleepDuration > 0 {
+		log.Printf("Waiting for %s until no new connections should come in anymore.", conf.Server.ShutdownSleepDuration.String())
+		time.Sleep(conf.Server.ShutdownSleepDuration)
+	}
+	if conf.Server.DrainTimeout > 0 {
+		log.Printf("Draining idle connections for up to %s.", conf.Server.DrainTimeout.String())
+		draining.Store(true)
+		drainStart := time.Now()
+		conns := atomic.LoadInt64(&openConnectionsCount)
+		for conns > 0 && time.Since(drainStart) < conf.Server.DrainTimeout {
+			log.Printf("Waiting for connections to drain. Remaining connections: %d", conns)
+			time.Sleep(1 * time.Second)
+			conns = atomic.LoadInt64(&openConnectionsCount)
 		}
+		log.Printf("Finished draining connections. Remaining connections: %d", conns)
 	}
-	log.Printf("Shutting down server gracefully...")
-	err = server.Shutdown(context.Background())
+	log.Printf("Shutting down server with a timeout of %s.", conf.Server.ShutdownTimeout.String())
+	var cancelFunc context.CancelFunc
+	ctx, cancelFunc := context.WithTimeout(context.Background(), conf.Server.ShutdownTimeout)
+	defer cancelFunc()
+	err := server.Shutdown(ctx)
 	if err != nil {
-		log.Panicf("Failed to shutdown server: %s", err)
+		log.Printf("Error during server shutdown: %s", err)
+	} else {
+		log.Printf("Server shutdown completed successfully.")
 	}
-	log.Printf("Server shutdown successfully. Exiting.")
 }

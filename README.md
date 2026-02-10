@@ -27,10 +27,14 @@ The required raw data can be downloaded here https://www.kaggle.com/datasets/rej
 
 ### Environment
 
-| Name               | Default           | Route                                                                                  |
-|--------------------|-------------------|----------------------------------------------------------------------------------------|
-| SERVER_PORT        | 8080              | Port used by the service.                                                              |
-| AIR_POLLUTION_FILE | air-pollution.csv | Path to CSV file with [raw data](ttps://www.kaggle.com/datasets/rejeph/air-pollution). |
+| Name                            | Default           | Route                                                                                                                                                                                                                            |
+|---------------------------------|-------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| SERVER_PORT                     | 8080              | Port used by the service.                                                                                                                                                                                                        |
+| AIR_POLLUTION_FILE              | air-pollution.csv | Path to CSV file with [raw data](ttps://www.kaggle.com/datasets/rejeph/air-pollution).                                                                                                                                           |
+| SERVER_IDLE_TIMEOUT             | 60s               | Idle timeout for HTTP server.                                                                                                                                                                                                    |
+| SERVER_SHUTDOWN_SLEEP_DURATION  | 0s                | Duration to sleep before initiating server shutdown. This should be set to a duration <br> after which no new connections are expected.                                                                                          |
+| SERVER_DRAIN_TIMEOUT            | 30s               | Duration to wait for existing (idle) connections to be closed by the clients. During this <br> time, the server will still accept new connections and requests but respond with <br> 'Connection: close' header to all requests. |
+| SERVER_SHUTDOWN_TIMEOUT         | 30s               | Duration to wait for the server to shutdown gracefully. During this time, the server will <br> not accept any more connections and requests, but wait for existing requests to finish.                                           |
 
 ### Locally
  * Download the raw data to a file, e.g. `/data/air-pollution.csv`.
