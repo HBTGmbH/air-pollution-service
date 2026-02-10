@@ -1,12 +1,8 @@
-.dockerignore
-.git/
-.github/
-.gitignore
-.idea/
-Dockerfile
-Makefile
-README.md
-air-pollution.csv
-docker-compose.yml
-http/
-main_test.go
+# Ignore everything
+*
+
+# Except non-test Go files and ca-certificates.crt
+!**/*.go
+**/*_test.go
+!go.sum
+!go.mod
