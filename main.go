@@ -87,13 +87,13 @@ func main() {
 }
 
 func gracefulShutdown(server *http.Server, conf *config.Conf) {
+	draining.Store(true)
 	if conf.Server.ShutdownSleepDuration > 0 {
 		log.Printf("Waiting for %s until no new connections should come in anymore.", conf.Server.ShutdownSleepDuration.String())
 		time.Sleep(conf.Server.ShutdownSleepDuration)
 	}
 	if conf.Server.DrainTimeout > 0 {
 		log.Printf("Draining idle connections for up to %s.", conf.Server.DrainTimeout.String())
-		draining.Store(true)
 		drainStart := time.Now()
 		conns := atomic.LoadInt64(&openConnectionsCount)
 		for conns > 0 && time.Since(drainStart) < conf.Server.DrainTimeout {
