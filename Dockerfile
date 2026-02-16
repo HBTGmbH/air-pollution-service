@@ -9,6 +9,6 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -trimpath -ldfl
 
 FROM scratch
 ENV TZ="Europe/Berlin"
-COPY --from=builder /app/build /
+COPY --from=builder /build/server /
 ENTRYPOINT ["/server"]
 CMD []
