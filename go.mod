@@ -3,7 +3,7 @@ module github.com/HBTGmbH/air-pollution-service
 go 1.26.0
 
 require (
-	github.com/caarlos0/env/v11 v11.3.1
+	github.com/caarlos0/env/v11 v11.4.0
 	github.com/go-chi/chi/v5 v5.2.5
 	github.com/go-chi/render v1.0.3
 	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
