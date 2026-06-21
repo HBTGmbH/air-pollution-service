@@ -8,8 +8,13 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
+    name: Build and test
     runs-on: ubuntu-latest
 
     permissions:

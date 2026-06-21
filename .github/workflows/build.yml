@@ -9,6 +9,10 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type != 'tag' }}
+
 jobs:
   test:
     name: Test and lint
@@ -17,12 +21,13 @@ jobs:
       contents: read
 
   build:
+    name: Build and push image
     runs-on: ubuntu-latest
     needs: [test]
 
     permissions:
       contents: read
-      packages: write
+      packages: write # push the built image to GHCR
 
     steps:
       - name: Check out repository
