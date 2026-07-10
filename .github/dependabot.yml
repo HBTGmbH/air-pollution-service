@@ -6,14 +6,26 @@ updates:
     interval: daily
   cooldown:
     default-days: 7
-      
+  ignore:
+    # Dependabot's docker ecosystem offers Go pre-release tags (e.g.
+    # 1.27rc2-alpine) as updates (dependabot/dependabot-core#4798).
+    # ignore.versions uses Gem requirement syntax; each range below matches
+    # only the pre-release window of one Go minor (1.27rc2 sorts between
+    # 1.26.x and 1.27.0), so real releases are unaffected.
+    - dependency-name: golang
+      versions:
+        - ">= 1.27.a, < 1.27"
+        - ">= 1.28.a, < 1.28"
+        - ">= 1.29.a, < 1.29"
+        - ">= 1.30.a, < 1.30"
+
 - package-ecosystem: gomod
   directory: /
   schedule:
     interval: daily
   cooldown:
     default-days: 7
-      
+
 - package-ecosystem: github-actions
   directory: /
   schedule:
