@@ -1,89 +1,62 @@
 package resource_test
 
 import (
-	"context"
-	"encoding/json"
-	"io"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/HBTGmbH/air-pollution-service/internal/model"
 	"github.com/HBTGmbH/air-pollution-service/internal/resource"
-	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-type fakeCountryStorage struct {
-	countries []*model.Country
+var schlaraffenland = &model.Country{ID: "sch", Name: "Schlaraffenland", Code: "SCH"}
+
+const schlaraffenlandJSON = `{"id": "sch", "name": "Schlaraffenland", "code": "SCH"}`
+
+func TestCountriesList(t *testing.T) {
+	t.Parallel()
+
+	handler := resource.CountryResource{Storage: fakeStorage{countries: []*model.Country{
+		schlaraffenland,
+		{ID: "utopia", Name: "Utopia"},
+	}}}
+
+	w := serve(t, handler.List, nil)
+
+	require.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t,
+		`[`+schlaraffenlandJSON+`, {"id": "utopia", "name": "Utopia", "code": ""}]`,
+		w.Body.String())
 }
 
-func (s fakeCountryStorage) FindAllByYears() map[int][]*model.Emissions {
-	panic("not implemented")
-}
+func TestCountriesListEmpty(t *testing.T) {
+	t.Parallel()
 
-func (s fakeCountryStorage) FindAllByYear(year int) map[string]*model.Emissions {
-	panic("not implemented")
-}
+	handler := resource.CountryResource{Storage: fakeStorage{}}
 
-func (s fakeCountryStorage) FindAllByCountries() map[string][]*model.Emissions {
-	panic("not implemented")
-}
+	w := serve(t, handler.List, nil)
 
-func (s fakeCountryStorage) FindAllByCountry(name string) map[int]*model.Emissions {
-	panic("not implemented")
-}
-
-func (s fakeCountryStorage) GetCountry(name string) *model.Country {
-	if len(s.countries) == 0 {
-		return nil
-	}
-	return s.countries[0]
-}
-
-func (s fakeCountryStorage) GetCountries() []*model.Country {
-	return s.countries
+	assert.Equal(t, http.StatusNotFound, w.Code)
 }
 
 func TestCountriesGetNonExisting(t *testing.T) {
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	ctx := chi.NewRouteContext()
-	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
-	ctx.URLParams.Add("id", "Schlaraffenland")
-	countryHandler := resource.CountryResource{Storage: fakeCountryStorage{[]*model.Country{}}}
+	t.Parallel()
 
-	countryHandler.Get(w, req)
-	res := w.Result()
-	defer res.Body.Close()
-	_, err := io.ReadAll(res.Body)
-	assert.Nil(t, err)
-	assert.Equal(t, 404, res.StatusCode)
+	handler := resource.CountryResource{Storage: fakeStorage{}}
+
+	w := serve(t, handler.Get, map[string]string{"id": "atlantis"})
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
 }
 
 func TestCountriesGetExisting(t *testing.T) {
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	ctx := chi.NewRouteContext()
-	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
-	ctx.URLParams.Add("id", "Schlaraffenland")
-	countryHandler := resource.CountryResource{Storage: fakeCountryStorage{[]*model.Country{{
-		Name: "Schlaraffenland",
-		Code: "SCH",
-		Id:   "sch",
-	}}}}
+	t.Parallel()
 
-	countryHandler.Get(w, req)
-	res := w.Result()
-	defer res.Body.Close()
-	data, err := io.ReadAll(res.Body)
-	assert.Nil(t, err)
-	assert.Equal(t, 200, res.StatusCode)
+	handler := resource.CountryResource{Storage: fakeStorage{countries: []*model.Country{schlaraffenland}}}
 
-	country := resource.CountryResponse{}
-	err = json.Unmarshal(data, &country)
-	assert.Nil(t, err)
-	assert.Equal(t, "Schlaraffenland", country.Name)
-	assert.Equal(t, "SCH", country.Code)
-	assert.Equal(t, "sch", country.Id)
+	w := serve(t, handler.Get, map[string]string{"id": schlaraffenland.Name})
+
+	require.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, schlaraffenlandJSON, w.Body.String())
 }
