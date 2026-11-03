@@ -61,6 +61,7 @@ func (rs EmissionResource) ListByYear(w http.ResponseWriter, r *http.Request) {
 // @Param year path string true "year"
 // @Success 200 {object} AirPollutionResponse
 // @Failure 400 {object} ErrResponse
+// @Failure 404 {object} ErrResponse
 func (rs EmissionResource) GetByYear(w http.ResponseWriter, r *http.Request) {
 	year, err := strconv.Atoi(chi.URLParam(r, "year"))
 	if err != nil {
@@ -71,6 +72,10 @@ func (rs EmissionResource) GetByYear(w http.ResponseWriter, r *http.Request) {
 	var yearEmissions []*model.Emissions
 	for _, emissions := range rs.Storage.FindAllByYear(year) {
 		yearEmissions = append(yearEmissions, emissions)
+	}
+	if len(yearEmissions) == 0 {
+		_ = render.Render(w, r, ErrNotFound())
+		return
 	}
 
 	response := newAirPollutionEmissionsResponse(yearEmissions)
@@ -116,6 +121,10 @@ func (rs EmissionResource) GetByCountry(w http.ResponseWriter, r *http.Request) 
 	var countryEmissions []*model.Emissions
 	for _, emissions := range rs.Storage.FindAllByCountry(strings.ToLower(id)) {
 		countryEmissions = append(countryEmissions, emissions)
+	}
+	if len(countryEmissions) == 0 {
+		_ = render.Render(w, r, ErrNotFound())
+		return
 	}
 
 	response := newAirPollutionEmissionsResponse(countryEmissions)
