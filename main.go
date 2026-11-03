@@ -59,9 +59,10 @@ func main() {
 	r.Mount("/emissions", resource.EmissionResource{Storage: repo}.Routes())
 
 	server := &http.Server{
-		Addr:        fmt.Sprintf(":%d", conf.Server.Port),
-		Handler:     r,
-		IdleTimeout: conf.Server.IdleTimeout,
+		Addr:              fmt.Sprintf(":%d", conf.Server.Port),
+		Handler:           r,
+		IdleTimeout:       conf.Server.IdleTimeout,
+		ReadHeaderTimeout: conf.Server.ReadHeaderTimeout,
 		ConnState: func(conn net.Conn, state http.ConnState) {
 			switch state {
 			case http.StateNew:
