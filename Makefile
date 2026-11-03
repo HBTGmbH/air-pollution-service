@@ -14,6 +14,11 @@ test:
 	@echo "Testing..."
 	@go test ./... -v
 
+# Lint the application (requires golangci-lint v2, see https://golangci-lint.run)
+lint:
+	@echo "Linting..."
+	@golangci-lint run ./...
+
 # Clean the binary
 clean:
 	@echo "Cleaning..."
@@ -25,4 +30,4 @@ swagger:
 	@go tool swag fmt
 	@go tool swag init
 
-.PHONY: all build run test clean watch swagger
+.PHONY: all build run test lint clean watch swagger

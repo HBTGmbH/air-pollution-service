@@ -1,65 +1,94 @@
 package resource
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/HBTGmbH/air-pollution-service/internal/model"
-	"github.com/go-chi/render"
 	"github.com/montanaflynn/stats"
 )
 
-// CountryResponse renderer type for country data
+// decimalPlaces is the precision of all statistics in API responses.
+const decimalPlaces = 2
+
+// CountryResponse renderer type for country data.
 type CountryResponse struct {
-	Id   string `json:"id"`
+	ID   string `json:"id"`
 	Name string `json:"name"`
 	Code string `json:"code"`
 } //	@name	CountryResponse
 
 func newCountryResponse(country *model.Country) CountryResponse {
 	return CountryResponse{
-		Id:   country.Id,
+		ID:   country.ID,
 		Name: country.Name,
 		Code: country.Code,
 	}
 }
 
-func (hr CountryResponse) Render(w http.ResponseWriter, r *http.Request) error {
+// Render implements render.Renderer.
+func (CountryResponse) Render(_ http.ResponseWriter, _ *http.Request) error {
 	return nil
 }
 
-// EmissionsResponse renderer type for accumulated air pollution datasets
+// EmissionsResponse renderer type for accumulated air pollution datasets.
 type EmissionsResponse struct {
 	Average           float64 `json:"average"`
 	Median            float64 `json:"median"`
 	StandardDeviation float64 `json:"standard_deviation"`
 } //	@name	EmissionsResponse
 
-func newEmissionsResponse(emissions []*model.Emissions, f func(emission *model.Emissions) float64) EmissionsResponse {
-	total := 0.0
-	values := make([]float64, len(emissions))
-
+// newEmissionsResponse computes the statistics of one kind of emissions,
+// selected by value, over all given emissions. It fails if emissions is empty.
+func newEmissionsResponse(
+	emissions []*model.Emissions,
+	value func(*model.Emissions) float64,
+) (EmissionsResponse, error) {
+	values := make(stats.Float64Data, len(emissions))
 	for i, emission := range emissions {
-		current := f(emission)
-		values[i] = current
-		total = total + current
+		values[i] = value(emission)
 	}
 
-	median, _ := stats.Median(values)
-	median, _ = stats.Round(median, 2)
+	average, err := roundedStatistic(values, stats.Mean)
+	if err != nil {
+		return EmissionsResponse{}, fmt.Errorf("computing average: %w", err)
+	}
 
-	standardDeviation, _ := stats.StandardDeviation(values)
-	standardDeviation, _ = stats.Round(standardDeviation, 2)
+	median, err := roundedStatistic(values, stats.Median)
+	if err != nil {
+		return EmissionsResponse{}, fmt.Errorf("computing median: %w", err)
+	}
 
-	average, _ := stats.Round(total/float64(len(emissions)), 2)
+	standardDeviation, err := roundedStatistic(values, stats.StandardDeviation)
+	if err != nil {
+		return EmissionsResponse{}, fmt.Errorf("computing standard deviation: %w", err)
+	}
 
 	return EmissionsResponse{
 		Average:           average,
 		Median:            median,
 		StandardDeviation: standardDeviation,
-	}
+	}, nil
 }
 
-// AirPollutionResponse renderer type for a single air pollution dataset
+func roundedStatistic(
+	values stats.Float64Data,
+	statistic func(stats.Float64Data) (float64, error),
+) (float64, error) {
+	result, err := statistic(values)
+	if err != nil {
+		return 0, err
+	}
+
+	rounded, err := stats.Round(result, decimalPlaces)
+	if err != nil {
+		return 0, fmt.Errorf("rounding %v: %w", result, err)
+	}
+
+	return rounded, nil
+}
+
+// AirPollutionResponse renderer type for a single air pollution dataset.
 type AirPollutionResponse struct {
 	NOxEmissions   EmissionsResponse `json:"nox_emissions"`
 	SO2Emissions   EmissionsResponse `json:"sulphur_dioxide_emissions"`
@@ -70,92 +99,54 @@ type AirPollutionResponse struct {
 	NH3Emissions   EmissionsResponse `json:"ammonia_emissions"`
 } //	@name	AirPollutionResponse
 
-func newAirPollutionEmissionsResponse(emissions []*model.Emissions) AirPollutionResponse {
-	return AirPollutionResponse{
-		NOxEmissions: newEmissionsResponse(emissions, func(emissions *model.Emissions) float64 {
-			return emissions.NOxEmissions
-		}),
-		SO2Emissions: newEmissionsResponse(emissions, func(emissions *model.Emissions) float64 {
-			return emissions.SO2Emissions
-		}),
-		COEmissions: newEmissionsResponse(emissions, func(emissions *model.Emissions) float64 {
-			return emissions.COEmissions
-		}),
-		OCEmissions: newEmissionsResponse(emissions, func(emissions *model.Emissions) float64 {
-			return emissions.OCEmissions
-		}),
-		NMVOCEmissions: newEmissionsResponse(emissions, func(emissions *model.Emissions) float64 {
-			return emissions.NMVOCEmissions
-		}),
-		BCEmissions: newEmissionsResponse(emissions, func(emissions *model.Emissions) float64 {
-			return emissions.BCEmissions
-		}),
-		NH3Emissions: newEmissionsResponse(emissions, func(emissions *model.Emissions) float64 {
-			return emissions.NH3Emissions
-		}),
+// newAirPollutionResponse computes the statistics of all kinds of emissions
+// over all given emissions. It fails if emissions is empty.
+func newAirPollutionResponse(emissions []*model.Emissions) (AirPollutionResponse, error) {
+	var response AirPollutionResponse
+	fields := []struct {
+		target *EmissionsResponse
+		value  func(*model.Emissions) float64
+	}{
+		{&response.NOxEmissions, func(e *model.Emissions) float64 { return e.NOxEmissions }},
+		{&response.SO2Emissions, func(e *model.Emissions) float64 { return e.SO2Emissions }},
+		{&response.COEmissions, func(e *model.Emissions) float64 { return e.COEmissions }},
+		{&response.OCEmissions, func(e *model.Emissions) float64 { return e.OCEmissions }},
+		{&response.NMVOCEmissions, func(e *model.Emissions) float64 { return e.NMVOCEmissions }},
+		{&response.BCEmissions, func(e *model.Emissions) float64 { return e.BCEmissions }},
+		{&response.NH3Emissions, func(e *model.Emissions) float64 { return e.NH3Emissions }},
 	}
+	for _, field := range fields {
+		emissionsResponse, err := newEmissionsResponse(emissions, field.value)
+		if err != nil {
+			return AirPollutionResponse{}, err
+		}
+		*field.target = emissionsResponse
+	}
+
+	return response, nil
 }
 
-func (hr AirPollutionResponse) Render(w http.ResponseWriter, r *http.Request) error {
+// Render implements render.Renderer.
+func (*AirPollutionResponse) Render(_ http.ResponseWriter, _ *http.Request) error {
 	return nil
 }
 
-// AirPollutionYears renderer type for air pollution data by year
+// AirPollutionYears renderer type for air pollution data by year.
 type AirPollutionYears struct {
 	Years map[int]AirPollutionResponse `json:"years"`
 } //	@name	AirPollutionYears
 
-func (hr AirPollutionYears) Render(w http.ResponseWriter, r *http.Request) error {
+// Render implements render.Renderer.
+func (AirPollutionYears) Render(_ http.ResponseWriter, _ *http.Request) error {
 	return nil
 }
 
-// AirPollutionCountries renderer type for air pollution data by country
+// AirPollutionCountries renderer type for air pollution data by country.
 type AirPollutionCountries struct {
 	Countries map[string]AirPollutionResponse `json:"countries"`
 } //	@name	AirPollutionCountries
 
-func (hr AirPollutionCountries) Render(w http.ResponseWriter, r *http.Request) error {
-	return nil
-}
-
-// ErrResponse renderer type for handling all sorts of errors.
-type ErrResponse struct {
-	StatusCode int    `json:"-"`
-	StatusText string `json:"text,omitempty"`
-	Err        error  `json:"-"`
-	ErrCode    int    `json:"code,omitempty" example:"404"`
-	ErrText    string `json:"error,omitempty" example:"The requested resource was not found on the server."`
-} //	@name	ErrResponse
-
-// ErrRender returns a structured http response in case of rendering errors
-func ErrRender(err error) render.Renderer {
-	return &ErrResponse{
-		Err:        err,
-		ErrText:    err.Error(),
-		StatusCode: http.StatusUnprocessableEntity,
-		StatusText: "Error rendering response",
-	}
-}
-
-// ErrInvalidRequest returns a structured http response in case of an invalid request
-func ErrInvalidRequest(err error) render.Renderer {
-	return &ErrResponse{
-		Err:        err,
-		ErrText:    err.Error(),
-		StatusCode: http.StatusBadRequest,
-		StatusText: "Invalid request",
-	}
-}
-
-// ErrNotFound returns a structured http response in case a resource was not found
-func ErrNotFound() render.Renderer {
-	return &ErrResponse{
-		StatusCode: http.StatusNotFound,
-		StatusText: "Resource not found",
-	}
-}
-
-func (e *ErrResponse) Render(w http.ResponseWriter, r *http.Request) error {
-	render.Status(r, e.StatusCode)
+// Render implements render.Renderer.
+func (AirPollutionCountries) Render(_ http.ResponseWriter, _ *http.Request) error {
 	return nil
 }

@@ -1,184 +1,98 @@
 package resource_test
 
 import (
-	"context"
 	"encoding/json"
-	"io"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"testing"
 
-	"github.com/HBTGmbH/air-pollution-service/internal/model"
 	"github.com/HBTGmbH/air-pollution-service/internal/resource"
-	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-type fakeEmissionsStorage struct {
-	emissions []*model.Emissions
-}
-
-func (s fakeEmissionsStorage) FindAllByYears() map[int][]*model.Emissions {
-	result := make(map[int][]*model.Emissions)
-	result[1234] = s.emissions
-	return result
-}
-
-func (s fakeEmissionsStorage) FindAllByYear(year int) map[string]*model.Emissions {
-	result := make(map[string]*model.Emissions)
-	for i, e := range s.emissions {
-		result[strconv.Itoa(i)] = e
-	}
-	return result
-}
-
-func (s fakeEmissionsStorage) FindAllByCountries() map[string][]*model.Emissions {
-	result := make(map[string][]*model.Emissions)
-	result["test"] = s.emissions
-	return result
-}
-
-func (s fakeEmissionsStorage) FindAllByCountry(name string) map[int]*model.Emissions {
-	result := make(map[int]*model.Emissions)
-	for i, e := range s.emissions {
-		result[i] = e
-	}
-	return result
-}
-
-func (s fakeEmissionsStorage) GetCountry(name string) *model.Country {
-	panic("not implemented")
-}
-
-func (s fakeEmissionsStorage) GetCountries() []*model.Country {
-	panic("not implemented")
-}
-
 func TestEmissionsListByYear(t *testing.T) {
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	ctx := chi.NewRouteContext()
-	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
-	emissionsHandler := resource.EmissionResource{Storage: fakeEmissionsStorage{[]*model.Emissions{{
-		NOxEmissions: 1,
-	}, {
-		NOxEmissions: 2,
-	}, {
-		NOxEmissions: 3,
-	}}}}
+	t.Parallel()
 
-	emissionsHandler.ListByYear(w, req)
-	res := w.Result()
-	defer res.Body.Close()
-	_, err := io.ReadAll(res.Body)
-	assert.Nil(t, err)
-	assert.Equal(t, 200, res.StatusCode)
+	handler := resource.EmissionResource{Storage: fakeStorage{emissions: noxEmissions(1, 2, 3)}}
 
-	// TODO validate response body
+	w := serve(t, handler.ListByYear, nil)
+
+	require.Equal(t, http.StatusOK, w.Code)
+	var response resource.AirPollutionYears
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &response))
+	require.Contains(t, response.Years, 1234)
+	assert.Equal(t,
+		resource.EmissionsResponse{Average: 2, Median: 2, StandardDeviation: 0.82},
+		response.Years[1234].NOxEmissions)
 }
 
 func TestEmissionsListByCountry(t *testing.T) {
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	ctx := chi.NewRouteContext()
-	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
-	emissionsHandler := resource.EmissionResource{Storage: fakeEmissionsStorage{[]*model.Emissions{{
-		NOxEmissions: 1,
-	}, {
-		NOxEmissions: 2,
-	}, {
-		NOxEmissions: 3,
-	}}}}
+	t.Parallel()
 
-	emissionsHandler.ListByCountry(w, req)
-	res := w.Result()
-	defer res.Body.Close()
-	_, err := io.ReadAll(res.Body)
-	assert.Nil(t, err)
-	assert.Equal(t, 200, res.StatusCode)
+	handler := resource.EmissionResource{Storage: fakeStorage{emissions: noxEmissions(1, 2, 3)}}
 
-	// TODO validate response body
+	w := serve(t, handler.ListByCountry, nil)
+
+	require.Equal(t, http.StatusOK, w.Code)
+	var response resource.AirPollutionCountries
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &response))
+	require.Contains(t, response.Countries, "test")
+	assert.Equal(t,
+		resource.EmissionsResponse{Average: 2, Median: 2, StandardDeviation: 0.82},
+		response.Countries["test"].NOxEmissions)
 }
 
-func TestEmissionsGetByCountry(t *testing.T) {
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	ctx := chi.NewRouteContext()
-	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
-	ctx.URLParams.Add("id", "Schlaraffenland")
-	emissionsHandler := resource.EmissionResource{Storage: fakeEmissionsStorage{[]*model.Emissions{{
-		NOxEmissions: 10,
-	}, {
-		NOxEmissions: 2,
-	}, {
-		NOxEmissions: 3,
-	}}}}
+func TestEmissionsGet(t *testing.T) {
+	t.Parallel()
 
-	emissionsHandler.GetByCountry(w, req)
-	res := w.Result()
-	defer res.Body.Close()
-	data, err := io.ReadAll(res.Body)
-	assert.Nil(t, err)
-	assert.Equal(t, 200, res.StatusCode)
+	endpoints := map[string]struct {
+		handler func(resource.EmissionResource, http.ResponseWriter, *http.Request)
+		params  map[string]string
+	}{
+		"by year":    {resource.EmissionResource.GetByYear, map[string]string{"year": "2000"}},
+		"by country": {resource.EmissionResource.GetByCountry, map[string]string{"id": "DEU"}},
+	}
+	for name, endpoint := range endpoints {
+		serveEndpoint := func(t *testing.T, storage fakeStorage) *httptest.ResponseRecorder {
+			t.Helper()
+			handler := resource.EmissionResource{Storage: storage}
 
-	airPollutionEmissions := resource.AirPollutionResponse{}
-	err = json.Unmarshal(data, &airPollutionEmissions)
-	assert.Nil(t, err)
-	assert.Equal(t, 5.0, airPollutionEmissions.NOxEmissions.Average)
-	assert.Equal(t, 3.0, airPollutionEmissions.NOxEmissions.Median)
-	assert.Equal(t, 3.56, airPollutionEmissions.NOxEmissions.StandardDeviation)
+			return serve(t, func(w http.ResponseWriter, r *http.Request) {
+				endpoint.handler(handler, w, r)
+			}, endpoint.params)
+		}
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			w := serveEndpoint(t, fakeStorage{emissions: noxEmissions(10, 2, 3)})
+
+			require.Equal(t, http.StatusOK, w.Code)
+			var response resource.AirPollutionResponse
+			require.NoError(t, json.Unmarshal(w.Body.Bytes(), &response))
+			assert.Equal(t,
+				resource.EmissionsResponse{Average: 5, Median: 3, StandardDeviation: 3.56},
+				response.NOxEmissions)
+		})
+
+		// Without any emissions there are no statistics to compute.
+		t.Run(name+" without data", func(t *testing.T) {
+			t.Parallel()
+
+			w := serveEndpoint(t, fakeStorage{})
+
+			assert.Equal(t, http.StatusNotFound, w.Code)
+		})
+	}
 }
 
-func TestEmissionsGetByYear(t *testing.T) {
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	ctx := chi.NewRouteContext()
-	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
-	ctx.URLParams.Add("year", "666")
-	emissionsHandler := resource.EmissionResource{Storage: fakeEmissionsStorage{[]*model.Emissions{{
-		NOxEmissions: 10,
-	}, {
-		NOxEmissions: 2,
-	}, {
-		NOxEmissions: 3,
-	}}}}
+func TestEmissionsGetByYearInvalid(t *testing.T) {
+	t.Parallel()
 
-	emissionsHandler.GetByYear(w, req)
-	res := w.Result()
-	defer res.Body.Close()
-	data, err := io.ReadAll(res.Body)
-	assert.Nil(t, err)
-	assert.Equal(t, 200, res.StatusCode)
+	handler := resource.EmissionResource{Storage: fakeStorage{emissions: noxEmissions(1)}}
 
-	airPollutionEmissions := resource.AirPollutionResponse{}
-	err = json.Unmarshal(data, &airPollutionEmissions)
-	assert.Nil(t, err)
-	assert.Equal(t, 5.0, airPollutionEmissions.NOxEmissions.Average)
-	assert.Equal(t, 3.0, airPollutionEmissions.NOxEmissions.Median)
-	assert.Equal(t, 3.56, airPollutionEmissions.NOxEmissions.StandardDeviation)
-}
+	w := serve(t, handler.GetByYear, map[string]string{"year": "last year"})
 
-func TestEmissionsGetByYearWithoutData(t *testing.T) {
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	ctx := chi.NewRouteContext()
-	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
-	ctx.URLParams.Add("year", "1999")
-	emissionsHandler := resource.EmissionResource{Storage: fakeEmissionsStorage{[]*model.Emissions{}}}
-
-	emissionsHandler.GetByYear(w, req)
-	assert.Equal(t, 404, w.Code)
-}
-
-func TestEmissionsGetByCountryWithoutData(t *testing.T) {
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	ctx := chi.NewRouteContext()
-	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
-	ctx.URLParams.Add("id", "Atlantis")
-	emissionsHandler := resource.EmissionResource{Storage: fakeEmissionsStorage{[]*model.Emissions{}}}
-
-	emissionsHandler.GetByCountry(w, req)
-	assert.Equal(t, 404, w.Code)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }

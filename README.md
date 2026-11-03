@@ -92,5 +92,13 @@ documentation inside of the `docs/` directory, run:
 make swagger
 ```
 
+CI fails if the annotations are not formatted or the generated documentation is out of date.
+
+### Linting
+The project is linted with [golangci-lint](https://golangci-lint.run) v2, configured in `.golangci.yml`:
+```bash
+make lint
+```
+
 ## 📝 TODO
 Authentication: https://github.com/HBTGmbH/air-pollution-service/issues/3

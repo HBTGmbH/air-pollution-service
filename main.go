@@ -1,3 +1,5 @@
+// Command air-pollution-service serves statistics about historical air
+// pollution data of all countries via a REST API.
 package main
 
 import (
@@ -16,24 +18,27 @@ import (
 	"github.com/HBTGmbH/air-pollution-service/config"
 	_ "github.com/HBTGmbH/air-pollution-service/docs"
 	"github.com/HBTGmbH/air-pollution-service/internal/csv"
+	"github.com/HBTGmbH/air-pollution-service/internal/drain"
 	"github.com/HBTGmbH/air-pollution-service/internal/resource"
 	"github.com/HBTGmbH/air-pollution-service/internal/store"
-	"github.com/HBTGmbH/air-pollution-service/internal/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	httpSwagger "github.com/swaggo/http-swagger"
+	httpswagger "github.com/swaggo/http-swagger"
 )
 
 var (
-	draining             = atomic.Bool{}
-	openConnectionsCount int64
+	draining             atomic.Bool
+	openConnectionsCount atomic.Int64
 )
 
 func main() {
 	// get the config
-	conf := config.New()
+	conf, err := config.New()
+	if err != nil {
+		log.Fatalf("Invalid configuration: %s", err)
+	}
 
 	// load raw data
 	repo, err := store.New(csv.New(conf.AirPollutionFile))
@@ -46,7 +51,7 @@ func main() {
 
 	// build API router
 	r := chi.NewRouter()
-	r.Use(util.WithConnectionDraining(func() bool { return draining.Load() }))
+	r.Use(drain.WithConnectionDraining(draining.Load))
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -54,7 +59,7 @@ func main() {
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	r.Get("/metrics", promhttp.Handler().ServeHTTP)
-	r.Get("/swagger/*", httpSwagger.Handler())
+	r.Get("/swagger/*", httpswagger.Handler())
 	r.Mount("/countries", resource.CountryResource{Storage: repo}.Routes())
 	r.Mount("/emissions", resource.EmissionResource{Storage: repo}.Routes())
 
@@ -63,12 +68,12 @@ func main() {
 		Handler:           r,
 		IdleTimeout:       conf.Server.IdleTimeout,
 		ReadHeaderTimeout: conf.Server.ReadHeaderTimeout,
-		ConnState: func(conn net.Conn, state http.ConnState) {
+		ConnState: func(_ net.Conn, state http.ConnState) {
 			switch state {
 			case http.StateNew:
-				atomic.AddInt64(&openConnectionsCount, 1)
+				openConnectionsCount.Add(1)
 			case http.StateClosed, http.StateHijacked:
-				atomic.AddInt64(&openConnectionsCount, -1)
+				openConnectionsCount.Add(-1)
 			default:
 				// no-op
 			}
@@ -77,41 +82,42 @@ func main() {
 
 	// start the server
 	go func() {
-		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Panicf("Failed to start server: %s", err)
+		serveErr := server.ListenAndServe()
+		if serveErr != nil && !errors.Is(serveErr, http.ErrServerClosed) {
+			log.Panicf("Failed to start server: %s", serveErr)
 		}
 	}()
 
-	log.Printf("Server started sucessfully!")
-	_ = <-c
+	log.Print("Server started successfully!")
+	<-c
 	gracefulShutdown(server, conf)
 }
 
 func gracefulShutdown(server *http.Server, conf *config.Conf) {
 	draining.Store(true)
 	if conf.Server.ShutdownSleepDuration > 0 {
-		log.Printf("Waiting for %s until no new connections should come in anymore.", conf.Server.ShutdownSleepDuration.String())
+		log.Printf("Waiting for %s until no new connections should come in anymore.",
+			conf.Server.ShutdownSleepDuration.String())
 		time.Sleep(conf.Server.ShutdownSleepDuration)
 	}
 	if conf.Server.DrainTimeout > 0 {
 		log.Printf("Draining idle connections for up to %s.", conf.Server.DrainTimeout.String())
 		drainStart := time.Now()
-		conns := atomic.LoadInt64(&openConnectionsCount)
+		conns := openConnectionsCount.Load()
 		for conns > 0 && time.Since(drainStart) < conf.Server.DrainTimeout {
 			log.Printf("Waiting for connections to drain. Remaining connections: %d", conns)
 			time.Sleep(1 * time.Second)
-			conns = atomic.LoadInt64(&openConnectionsCount)
+			conns = openConnectionsCount.Load()
 		}
 		log.Printf("Finished draining connections. Remaining connections: %d", conns)
 	}
 	log.Printf("Shutting down server with a timeout of %s.", conf.Server.ShutdownTimeout.String())
-	var cancelFunc context.CancelFunc
-	ctx, cancelFunc := context.WithTimeout(context.Background(), conf.Server.ShutdownTimeout)
-	defer cancelFunc()
+	ctx, cancel := context.WithTimeout(context.Background(), conf.Server.ShutdownTimeout)
+	defer cancel()
 	err := server.Shutdown(ctx)
 	if err != nil {
 		log.Printf("Error during server shutdown: %s", err)
 	} else {
-		log.Printf("Server shutdown completed successfully.")
+		log.Print("Server shutdown completed successfully.")
 	}
 }

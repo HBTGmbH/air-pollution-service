@@ -1,23 +1,24 @@
 package resource
 
 import (
-	"errors"
 	"fmt"
+	"maps"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/HBTGmbH/air-pollution-service/internal/model"
-	"github.com/HBTGmbH/air-pollution-service/internal/store"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/render"
 )
 
+// EmissionResource serves statistics about the emissions of the data set.
 type EmissionResource struct {
-	Storage store.Storage
+	Storage Storage
 }
 
-func (rs EmissionResource) Routes() chi.Router {
+// Routes returns the router of all emission endpoints.
+func (rs EmissionResource) Routes() *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Route("/year/", func(r chi.Router) {
@@ -33,7 +34,7 @@ func (rs EmissionResource) Routes() chi.Router {
 	return r
 }
 
-// ListByYear returns the emissions of all countries accumulated for each year
+// ListByYear returns the emissions of all countries accumulated for each year.
 //
 //	@Summary		List emissions of each year accumulated over all countries
 //	@Description	All historical emissions data of each year accumulated over all countries
@@ -47,13 +48,19 @@ func (rs EmissionResource) ListByYear(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for year, emissions := range rs.Storage.FindAllByYears() {
-		response.Years[year] = newAirPollutionEmissionsResponse(emissions)
+		yearResponse, err := newAirPollutionResponse(emissions)
+		if err != nil {
+			respondInternalError(w, r, fmt.Errorf("year %d: %w", year, err))
+
+			return
+		}
+		response.Years[year] = yearResponse
 	}
 
-	_ = render.Render(w, r, response)
+	respond(w, r, response)
 }
 
-// GetByYear returns the emissions of all countries accumulated for a single year
+// GetByYear returns the emissions of all countries accumulated for a single year.
 //
 //	@Summary		Get emissions of all countries accumulated for a single year
 //	@Description	All historical emissions data of a year accumulated over all countries, available in the database
@@ -67,24 +74,15 @@ func (rs EmissionResource) ListByYear(w http.ResponseWriter, r *http.Request) {
 func (rs EmissionResource) GetByYear(w http.ResponseWriter, r *http.Request) {
 	year, err := strconv.Atoi(chi.URLParam(r, "year"))
 	if err != nil {
-		_ = render.Render(w, r, ErrInvalidRequest(errors.New(fmt.Sprintf("Year missing"))))
+		respond(w, r, ErrInvalidRequest("Year missing"))
+
 		return
 	}
 
-	var yearEmissions []*model.Emissions
-	for _, emissions := range rs.Storage.FindAllByYear(year) {
-		yearEmissions = append(yearEmissions, emissions)
-	}
-	if len(yearEmissions) == 0 {
-		_ = render.Render(w, r, ErrNotFound())
-		return
-	}
-
-	response := newAirPollutionEmissionsResponse(yearEmissions)
-	_ = render.Render(w, r, response)
+	respondWithAirPollution(w, r, slices.Collect(maps.Values(rs.Storage.FindAllByYear(year))))
 }
 
-// ListByCountry returns the emissions of all years accumulated for each country
+// ListByCountry returns the emissions of all years accumulated for each country.
 //
 //	@Summary		List emissions of each country accumulated over all years
 //	@Description	All historical emissions data of each country accumulated over all years
@@ -98,13 +96,19 @@ func (rs EmissionResource) ListByCountry(w http.ResponseWriter, r *http.Request)
 	}
 
 	for country, emissions := range rs.Storage.FindAllByCountries() {
-		response.Countries[country] = newAirPollutionEmissionsResponse(emissions)
+		countryResponse, err := newAirPollutionResponse(emissions)
+		if err != nil {
+			respondInternalError(w, r, fmt.Errorf("country %s: %w", country, err))
+
+			return
+		}
+		response.Countries[country] = countryResponse
 	}
 
-	_ = render.Render(w, r, response)
+	respond(w, r, response)
 }
 
-// GetByCountry returns the emissions of all years accumulated for a single country
+// GetByCountry returns the emissions of all years accumulated for a single country.
 //
 //	@Summary		Get emissions of all years accumulated for a single country
 //	@Description	All historical emissions data of a country accumulated over all years, available in the database
@@ -118,19 +122,30 @@ func (rs EmissionResource) ListByCountry(w http.ResponseWriter, r *http.Request)
 func (rs EmissionResource) GetByCountry(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		_ = render.Render(w, r, ErrInvalidRequest(errors.New(fmt.Sprintf("Country id missing"))))
+		respond(w, r, ErrInvalidRequest("Country id missing"))
+
 		return
 	}
 
-	var countryEmissions []*model.Emissions
-	for _, emissions := range rs.Storage.FindAllByCountry(strings.ToLower(id)) {
-		countryEmissions = append(countryEmissions, emissions)
-	}
-	if len(countryEmissions) == 0 {
-		_ = render.Render(w, r, ErrNotFound())
+	emissions := rs.Storage.FindAllByCountry(strings.ToLower(id))
+	respondWithAirPollution(w, r, slices.Collect(maps.Values(emissions)))
+}
+
+// respondWithAirPollution responds with the statistics over all given
+// emissions, or with 404 if there are none.
+func respondWithAirPollution(w http.ResponseWriter, r *http.Request, emissions []*model.Emissions) {
+	if len(emissions) == 0 {
+		respond(w, r, ErrNotFound())
+
 		return
 	}
 
-	response := newAirPollutionEmissionsResponse(countryEmissions)
-	_ = render.Render(w, r, response)
+	response, err := newAirPollutionResponse(emissions)
+	if err != nil {
+		respondInternalError(w, r, err)
+
+		return
+	}
+
+	respond(w, r, &response)
 }

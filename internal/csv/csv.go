@@ -1,12 +1,16 @@
+// Package csv reads the raw air pollution data set from a CSV file.
 package csv
 
 import (
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/gocarina/gocsv"
 )
 
+// Row is a single row of the air pollution data set: the emissions of one
+// country in one year.
 type Row struct {
 	Entity         string  `csv:"Entity"`
 	Code           string  `csv:"Code"`
@@ -20,33 +24,30 @@ type Row struct {
 	NH3Emissions   float64 `csv:"Ammonia (NH₃) emissions"`
 }
 
+// File is a CSV file containing the air pollution data set.
 type File struct {
 	fileName string
 }
 
+// New returns the CSV file with the given name.
 func New(fileName string) *File {
 	return &File{
 		fileName: fileName,
 	}
 }
 
+// ReadRows reads and parses all rows of the file.
 func (f *File) ReadRows() ([]*Row, error) {
 	log.Printf("Load data from %s ...", f.fileName)
-	csvFile, err := os.OpenFile(f.fileName, os.O_RDONLY, os.ModePerm)
+	data, err := os.ReadFile(f.fileName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("reading CSV file: %w", err)
 	}
 
-	defer func(csvFile *os.File) {
-		err := csvFile.Close()
-		if err != nil {
-			log.Fatalf("Failed to close file %s", f.fileName)
-		}
-	}(csvFile)
-
 	var rows []*Row
-	if err := gocsv.UnmarshalFile(csvFile, &rows); err != nil {
-		return nil, err
+	err = gocsv.UnmarshalBytes(data, &rows)
+	if err != nil {
+		return nil, fmt.Errorf("parsing CSV file %s: %w", f.fileName, err)
 	}
 
 	return rows, nil

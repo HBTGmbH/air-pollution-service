@@ -1,21 +1,32 @@
+// Package resource implements the HTTP handlers of the REST API.
 package resource
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/HBTGmbH/air-pollution-service/internal/store"
+	"github.com/HBTGmbH/air-pollution-service/internal/model"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 )
 
-type CountryResource struct {
-	Storage store.Storage
+// Storage provides read access to the data set.
+type Storage interface {
+	FindAllByYears() map[int][]*model.Emissions
+	FindAllByYear(year int) map[string]*model.Emissions
+	FindAllByCountries() map[string][]*model.Emissions
+	FindAllByCountry(id string) map[int]*model.Emissions
+	GetCountry(id string) *model.Country
+	GetCountries() []*model.Country
 }
 
-func (rs CountryResource) Routes() chi.Router {
+// CountryResource serves the countries of the data set.
+type CountryResource struct {
+	Storage Storage
+}
+
+// Routes returns the router of all country endpoints.
+func (rs CountryResource) Routes() *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Get("/", rs.List)
@@ -27,7 +38,7 @@ func (rs CountryResource) Routes() chi.Router {
 	return r
 }
 
-// List returns all countries
+// List returns all countries.
 //
 //	@Summary		List all available countries
 //	@Description	Returns all countries available in the database
@@ -39,20 +50,21 @@ func (rs CountryResource) Routes() chi.Router {
 //	@Failure		404	{object}	ErrResponse
 func (rs CountryResource) List(w http.ResponseWriter, r *http.Request) {
 	countries := rs.Storage.GetCountries()
-	if countries == nil {
-		_ = render.Render(w, r, ErrNotFound())
+	if len(countries) == 0 {
+		respond(w, r, ErrNotFound())
+
 		return
 	}
 
-	var response []render.Renderer
-	for _, article := range countries {
-		response = append(response, newCountryResponse(article))
+	response := make([]render.Renderer, 0, len(countries))
+	for _, country := range countries {
+		response = append(response, newCountryResponse(country))
 	}
 
-	_ = render.RenderList(w, r, response)
+	respondList(w, r, response)
 }
 
-// Get returns a single country
+// Get returns a single country.
 //
 //	@Summary		Get country by its id
 //	@Description	Returns a single country by id
@@ -66,16 +78,17 @@ func (rs CountryResource) List(w http.ResponseWriter, r *http.Request) {
 func (rs CountryResource) Get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		_ = render.Render(w, r, ErrInvalidRequest(errors.New(fmt.Sprintf("Country id missing"))))
+		respond(w, r, ErrInvalidRequest("Country id missing"))
+
 		return
 	}
 
 	country := rs.Storage.GetCountry(strings.ToLower(id))
 	if country == nil {
-		_ = render.Render(w, r, ErrNotFound())
+		respond(w, r, ErrNotFound())
+
 		return
 	}
 
-	response := newCountryResponse(country)
-	_ = render.Render(w, r, response)
+	respond(w, r, newCountryResponse(country))
 }
