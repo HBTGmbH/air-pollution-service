@@ -34,12 +34,13 @@ func (rs EmissionResource) Routes() chi.Router {
 }
 
 // ListByYear returns the emissions of all countries accumulated for each year
-// @Summary List emissions of each year accumulated over all countries
-// @Description All historical emissions data of each year accumulated over all countries
-// @Tags emission year
-// @Produce json
-// @Router /emissions/year/ [get]
-// @Success 200 {object} AirPollutionYears
+//
+//	@Summary		List emissions of each year accumulated over all countries
+//	@Description	All historical emissions data of each year accumulated over all countries
+//	@Tags			emission year
+//	@Produce		json
+//	@Router			/emissions/year/ [get]
+//	@Success		200	{object}	AirPollutionYears
 func (rs EmissionResource) ListByYear(w http.ResponseWriter, r *http.Request) {
 	response := AirPollutionYears{
 		Years: make(map[int]AirPollutionResponse),
@@ -53,15 +54,16 @@ func (rs EmissionResource) ListByYear(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetByYear returns the emissions of all countries accumulated for a single year
-// @Summary Get emissions of all countries accumulated for a single year
-// @Description All historical emissions data of a year accumulated over all countries, available in the database
-// @Tags emission year
-// @Produce json
-// @Router /emissions/year/{year} [get]
-// @Param year path string true "year"
-// @Success 200 {object} AirPollutionResponse
-// @Failure 400 {object} ErrResponse
-// @Failure 404 {object} ErrResponse
+//
+//	@Summary		Get emissions of all countries accumulated for a single year
+//	@Description	All historical emissions data of a year accumulated over all countries, available in the database
+//	@Tags			emission year
+//	@Produce		json
+//	@Router			/emissions/year/{year} [get]
+//	@Param			year	path		string	true	"year"
+//	@Success		200		{object}	AirPollutionResponse
+//	@Failure		400		{object}	ErrResponse
+//	@Failure		404		{object}	ErrResponse
 func (rs EmissionResource) GetByYear(w http.ResponseWriter, r *http.Request) {
 	year, err := strconv.Atoi(chi.URLParam(r, "year"))
 	if err != nil {
@@ -83,12 +85,13 @@ func (rs EmissionResource) GetByYear(w http.ResponseWriter, r *http.Request) {
 }
 
 // ListByCountry returns the emissions of all years accumulated for each country
-// @Summary List emissions of each country accumulated over all years
-// @Description All historical emissions data of each country accumulated over all years
-// @Tags emission country
-// @Produce json
-// @Router /emissions/country/ [get]
-// @Success 200 {object} AirPollutionCountries
+//
+//	@Summary		List emissions of each country accumulated over all years
+//	@Description	All historical emissions data of each country accumulated over all years
+//	@Tags			emission country
+//	@Produce		json
+//	@Router			/emissions/country/ [get]
+//	@Success		200	{object}	AirPollutionCountries
 func (rs EmissionResource) ListByCountry(w http.ResponseWriter, r *http.Request) {
 	response := AirPollutionCountries{
 		Countries: make(map[string]AirPollutionResponse),
@@ -102,15 +105,16 @@ func (rs EmissionResource) ListByCountry(w http.ResponseWriter, r *http.Request)
 }
 
 // GetByCountry returns the emissions of all years accumulated for a single country
-// @Summary Get emissions of all years accumulated for a single country
-// @Description All historical emissions data of a country accumulated over all years, available in the database
-// @Tags emission country
-// @Produce json
-// @Router /emissions/country/{id} [get]
-// @Param id path string true "id of the country, case-insensitive"
-// @Success 200 {object} AirPollutionResponse
-// @Failure 400 {object} ErrResponse
-// @Failure 404 {object} ErrResponse
+//
+//	@Summary		Get emissions of all years accumulated for a single country
+//	@Description	All historical emissions data of a country accumulated over all years, available in the database
+//	@Tags			emission country
+//	@Produce		json
+//	@Router			/emissions/country/{id} [get]
+//	@Param			id	path		string	true	"id of the country, case-insensitive"
+//	@Success		200	{object}	AirPollutionResponse
+//	@Failure		400	{object}	ErrResponse
+//	@Failure		404	{object}	ErrResponse
 func (rs EmissionResource) GetByCountry(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {

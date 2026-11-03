@@ -13,7 +13,7 @@ type CountryResponse struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
 	Code string `json:"code"`
-} // @name CountryResponse
+} //	@name	CountryResponse
 
 func newCountryResponse(country *model.Country) CountryResponse {
 	return CountryResponse{
@@ -32,7 +32,7 @@ type EmissionsResponse struct {
 	Average           float64 `json:"average"`
 	Median            float64 `json:"median"`
 	StandardDeviation float64 `json:"standard_deviation"`
-} // @name EmissionsResponse
+} //	@name	EmissionsResponse
 
 func newEmissionsResponse(emissions []*model.Emissions, f func(emission *model.Emissions) float64) EmissionsResponse {
 	total := 0.0
@@ -68,7 +68,7 @@ type AirPollutionResponse struct {
 	NMVOCEmissions EmissionsResponse `json:"nmvoc_emissions"`
 	BCEmissions    EmissionsResponse `json:"black_carbon_emissions"`
 	NH3Emissions   EmissionsResponse `json:"ammonia_emissions"`
-} // @name AirPollutionResponse
+} //	@name	AirPollutionResponse
 
 func newAirPollutionEmissionsResponse(emissions []*model.Emissions) AirPollutionResponse {
 	return AirPollutionResponse{
@@ -103,7 +103,7 @@ func (hr AirPollutionResponse) Render(w http.ResponseWriter, r *http.Request) er
 // AirPollutionYears renderer type for air pollution data by year
 type AirPollutionYears struct {
 	Years map[int]AirPollutionResponse `json:"years"`
-} // @name AirPollutionYears
+} //	@name	AirPollutionYears
 
 func (hr AirPollutionYears) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
@@ -112,7 +112,7 @@ func (hr AirPollutionYears) Render(w http.ResponseWriter, r *http.Request) error
 // AirPollutionCountries renderer type for air pollution data by country
 type AirPollutionCountries struct {
 	Countries map[string]AirPollutionResponse `json:"countries"`
-} // @name AirPollutionCountries
+} //	@name	AirPollutionCountries
 
 func (hr AirPollutionCountries) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
@@ -125,7 +125,7 @@ type ErrResponse struct {
 	Err        error  `json:"-"`
 	ErrCode    int    `json:"code,omitempty" example:"404"`
 	ErrText    string `json:"error,omitempty" example:"The requested resource was not found on the server."`
-} // @name ErrResponse
+} //	@name	ErrResponse
 
 // ErrRender returns a structured http response in case of rendering errors
 func ErrRender(err error) render.Renderer {
