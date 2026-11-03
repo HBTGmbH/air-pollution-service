@@ -15,6 +15,7 @@ type Conf struct {
 type ConfServer struct {
 	Port                  int           `env:"SERVER_PORT" envDefault:"8080"`
 	IdleTimeout           time.Duration `env:"SERVER_IDLE_TIMEOUT" envDefault:"60s"`
+	ReadHeaderTimeout     time.Duration `env:"SERVER_READ_HEADER_TIMEOUT" envDefault:"10s"`
 	ShutdownSleepDuration time.Duration `env:"SERVER_SHUTDOWN_SLEEP_DURATION" envDefault:"0s"`
 	DrainTimeout          time.Duration `env:"SERVER_DRAIN_TIMEOUT" envDefault:"30s"`
 	ShutdownTimeout       time.Duration `env:"SERVER_SHUTDOWN_TIMEOUT" envDefault:"30s"`
