@@ -28,14 +28,15 @@ func (rs CountryResource) Routes() chi.Router {
 }
 
 // List returns all countries
-// @Summary List all available countries
-// @Description Returns all countries available in the database
-// @Tags country
-// @Produce json
-// @Router /countries/ [get]
-// @Success 200 {object} []CountryResponse
-// @Failure 400 {object} ErrResponse
-// @Failure 404 {object} ErrResponse
+//
+//	@Summary		List all available countries
+//	@Description	Returns all countries available in the database
+//	@Tags			country
+//	@Produce		json
+//	@Router			/countries/ [get]
+//	@Success		200	{object}	[]CountryResponse
+//	@Failure		400	{object}	ErrResponse
+//	@Failure		404	{object}	ErrResponse
 func (rs CountryResource) List(w http.ResponseWriter, r *http.Request) {
 	countries := rs.Storage.GetCountries()
 	if countries == nil {
@@ -52,15 +53,16 @@ func (rs CountryResource) List(w http.ResponseWriter, r *http.Request) {
 }
 
 // Get returns a single country
-// @Summary Get country by its id
-// @Description Returns a single country by id
-// @Tags country
-// @Produce json
-// @Router /countries/{id} [get]
-// @Param id path string true "ID of the country, case-insensitive"
-// @Success 200 {object} CountryResponse
-// @Failure 400 {object} ErrResponse
-// @Failure 404 {object} ErrResponse
+//
+//	@Summary		Get country by its id
+//	@Description	Returns a single country by id
+//	@Tags			country
+//	@Produce		json
+//	@Router			/countries/{id} [get]
+//	@Param			id	path		string	true	"ID of the country, case-insensitive"
+//	@Success		200	{object}	CountryResponse
+//	@Failure		400	{object}	ErrResponse
+//	@Failure		404	{object}	ErrResponse
 func (rs CountryResource) Get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
