@@ -158,3 +158,27 @@ func TestEmissionsGetByYear(t *testing.T) {
 	assert.Equal(t, 3.0, airPollutionEmissions.NOxEmissions.Median)
 	assert.Equal(t, 3.56, airPollutionEmissions.NOxEmissions.StandardDeviation)
 }
+
+func TestEmissionsGetByYearWithoutData(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	ctx := chi.NewRouteContext()
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
+	ctx.URLParams.Add("year", "1999")
+	emissionsHandler := resource.EmissionResource{Storage: fakeEmissionsStorage{[]*model.Emissions{}}}
+
+	emissionsHandler.GetByYear(w, req)
+	assert.Equal(t, 404, w.Code)
+}
+
+func TestEmissionsGetByCountryWithoutData(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	ctx := chi.NewRouteContext()
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, ctx))
+	ctx.URLParams.Add("id", "Atlantis")
+	emissionsHandler := resource.EmissionResource{Storage: fakeEmissionsStorage{[]*model.Emissions{}}}
+
+	emissionsHandler.GetByCountry(w, req)
+	assert.Equal(t, 404, w.Code)
+}

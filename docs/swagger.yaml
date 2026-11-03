@@ -189,6 +189,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrResponse'
       summary: Get emissions of all countries accumulated for a single year
       tags:
       - emission year

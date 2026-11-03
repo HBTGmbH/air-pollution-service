@@ -203,6 +203,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/ErrResponse"
                         }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrResponse"
+                        }
                     }
                 }
             }
